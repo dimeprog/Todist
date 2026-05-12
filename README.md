@@ -12,5 +12,4 @@ This architecture follows an offline-first pattern:
 - Supabase handles sync + realtime
 - Riverpod manages reactive state
 
-## Architecture Diagram
 
