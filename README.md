@@ -1,4 +1,19 @@
-An offline first todo app and using to remote is using supabase <img width="124" height="150" alt="todo_offline_first_architecture" src="https://github.com/user-attachments/assets/00f02015-0221-49bb-b50c-42f69dc7777e" />
+# Offline-First Todo App Architecture
+
+![Architecture](https://github.com/user-attachments/assets/00f02015-0221-49bb-b50c-42f69dc7777e)
+
+## Overview
+
+This architecture follows an offline-first pattern:
+
+- Local database is the source of truth
+- UI never waits for network
+- Outbox queue handles retries
+- Supabase handles sync + realtime
+- Riverpod manages reactive state
+
+## Architecture Diagram
+
 <svg width="100%" viewBox="0 0 680 820" role="img" style="" xmlns="http://www.w3.org/2000/svg">
   <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Todo app offline-first architecture with Supabase sync</title>
   <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Three-layer architecture: UI layer, local layer with Hive/SQLite and outbox queue, and remote Supabase layer connected by a sync engine</desc>
@@ -140,3 +155,5 @@ An offline first todo app and using to remote is using supabase <img width="124"
   <text x="340" y="791" text-anchor="middle" style="fill:rgb(194, 192, 182);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:auto">Write → Local first → Outbox if offline → Flush on reconnect → Supabase upsert → Realtime back</text>
 
 </svg>
+  <img width="124" height="150" alt="todo_offline_first_architecture" src="https://github.com/user-attachments/assets/28a11628-7a1e-4af2-8c4c-3f7e28758260" />
+
