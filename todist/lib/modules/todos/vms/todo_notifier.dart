@@ -60,7 +60,7 @@ class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
     state = AsyncData([tempTodo, ...state.requireValue]);
 
     try {
-      final created = await _repository.create(title.trim());
+      await _repository.create(title.trim());
 
       // // Replace temp with actual
       // state = AsyncData([
@@ -175,8 +175,8 @@ final filteredTodosProvider = Provider<AsyncValue<List<TodoModel>>>((ref) {
       case TodoFilter.completed:
         return todos.where((t) => t.isCompleted).toList();
       case TodoFilter.all:
-      default:
         return todos;
+
     }
   });
 });
