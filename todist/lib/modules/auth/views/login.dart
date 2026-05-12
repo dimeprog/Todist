@@ -40,7 +40,7 @@ class LoginPage extends HookConsumerWidget {
                   if (n is LoginSuccess) {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (_) => TodoListScreen()),
+                      MaterialPageRoute(builder: (_) => TodosPage()),
                       (_) => false,
                     );
                   }

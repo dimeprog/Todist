@@ -36,7 +36,7 @@ class TodoModel extends HiveObject {
   final bool isDeleted;
 
   @HiveField(9)
-  final String userId;
+  final String? userId;
 
   TodoModel({
     String? localId,
@@ -47,7 +47,6 @@ class TodoModel extends HiveObject {
     this.syncStatus = SyncStatus.pending,
     DateTime? createdAt,
     DateTime? updatedAt,
-
     this.retryCount = 0,
     this.isDeleted = false,
   }) : localId = localId ?? const Uuid().v4(),

@@ -18,7 +18,7 @@ class TodoModelAdapter extends TypeAdapter<TodoModel> {
     };
     return TodoModel(
       localId: fields[0] as String?,
-      userId: fields[9] as String,
+      userId: fields[9] as String?,
       remoteId: fields[1] as String?,
       title: fields[2] as String,
       isCompleted: fields[3] as bool,

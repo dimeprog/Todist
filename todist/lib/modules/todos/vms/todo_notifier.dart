@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/todo_model.dart';
 import 'package:todist/modules/todos/data/todo_providers.dart';
 import 'package:todist/modules/todos/data/todo_repo.dart';
-
 
 final todoListProvider =
     AsyncNotifierProvider<TodoListNotifier, List<TodoModel>>(
@@ -14,12 +14,14 @@ final todoListProvider =
 
 class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
   late TodoRepository _repository;
+  // final SupabaseClient _client= Supabase.instance.client;
   StreamSubscription? _subscription;
 
   @override
   FutureOr<List<TodoModel>> build() {
     _repository = ref.watch(todoRepositoryProvider);
     _watchLocalChanges();
+    authChange();
     return _loadFromLocal();
   }
 
@@ -34,6 +36,15 @@ class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
     });
   }
 
+  void authChange() {
+    Supabase.instance.client.auth.onAuthStateChange.listen((e) {
+      if (e.event == AuthChangeEvent.signedOut) {
+        _repository.clear();
+        ref.invalidateSelf();
+      }
+    });
+  }
+
   // ── Actions ────────────────────────────────────────────────
 
   Future<void> createTodo(String title) async {
@@ -43,6 +54,7 @@ class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
     final tempTodo = TodoModel(
       title: title.trim(),
       syncStatus: SyncStatus.pending,
+      // userId: _client.auth.currentUser!.id
     );
 
     state = AsyncData([tempTodo, ...state.requireValue]);
@@ -50,11 +62,11 @@ class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
     try {
       final created = await _repository.create(title.trim());
 
-      // Replace temp with actual
-      state = AsyncData([
-        created,
-        ...state.requireValue.where((t) => t.localId != tempTodo.localId),
-      ]);
+      // // Replace temp with actual
+      // state = AsyncData([
+      //   created,
+      //   ...state.requireValue.where((t) => t.localId != tempTodo.localId),
+      // ]);
     } catch (e) {
       // Rollback on error
       state = AsyncData(

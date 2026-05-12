@@ -39,7 +39,7 @@ class RegisterPage extends HookConsumerWidget {
                   if (n is Registered) {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (_) => TodoListScreen()),
+                      MaterialPageRoute(builder: (_) => TodosPage()),
                       (_) => false,
                     );
                     return;

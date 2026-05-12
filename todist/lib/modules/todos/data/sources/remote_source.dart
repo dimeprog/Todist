@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:todist/models/todo_model.dart';
 
+import '../../../../core/logger.dart';
+
 class RemoteTodoSource {
   final SupabaseClient _client;
   static const _table = 'todos';
@@ -21,7 +23,7 @@ class RemoteTodoSource {
         )
         .select()
         .single();
-
+    log.d('/// write to remote \n${todo.toRemoteJson()}');
     return TodoModel.fromRemoteJson(response);
   }
 
@@ -34,6 +36,7 @@ class RemoteTodoSource {
         })
         .eq('local_id', localId)
         .eq('user_id', _client.auth.currentUser!.id);
+    log.d('/// delete from remote $localId');
   }
 
   // ── Read / Delta sync ──────────────────────────────────────
@@ -49,7 +52,8 @@ class RemoteTodoSource {
       query = query.gte('updated_at', since.toIso8601String());
     }
 
-    final rows = await query.order('updated_at');
+    final rows = await query.order('updated_at', ascending: false);
+    log.d('/// fetch from remote \n${rows.map((e) => e)}');
     return rows.map(TodoModel.fromRemoteJson).toList();
   }
 
@@ -74,6 +78,7 @@ class RemoteTodoSource {
           ),
           callback: (payload) {
             final todo = TodoModel.fromRemoteJson(payload.newRecord);
+            log.d('/// on realtime insert \n${todo.toRemoteJson()}');
             onUpsert(todo);
           },
         )
@@ -89,6 +94,7 @@ class RemoteTodoSource {
           callback: (payload) {
             final todo = TodoModel.fromRemoteJson(payload.newRecord);
             if (todo.isDeleted) {
+              log.d('/// on realtime update \n${todo.toRemoteJson()}');
               onDelete(todo.localId);
             } else {
               onUpsert(todo);

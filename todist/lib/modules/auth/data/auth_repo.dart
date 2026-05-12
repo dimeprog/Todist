@@ -18,6 +18,8 @@ abstract class AuthRepository {
   });
 
   Stream<AuthState> authStateChanges();
+
+  FutureResponse<bool> logout();
 }
 
 final authRepoProvider = Provider<AuthRepository>((_) {
@@ -67,9 +69,20 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(Failure(e.toString()));
     }
   }
-  
+
   @override
   Stream<AuthState> authStateChanges() {
     return client.auth.onAuthStateChange;
+  }
+
+  @override
+  FutureResponse<bool> logout() async {
+    try {
+      await client.auth.signOut();
+      return Right(ResponseData(data: true));
+    } catch (e) {
+      debugPrint(e.toString());
+      return Left(Failure(e.toString()));
+    }
   }
 }

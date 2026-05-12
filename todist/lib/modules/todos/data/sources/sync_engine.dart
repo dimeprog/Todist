@@ -8,6 +8,7 @@ import 'package:todist/models/outbox_entry.dart';
 import 'package:todist/models/todo_model.dart';
 import 'package:todist/modules/todos/data/sources/local_todo_source.dart';
 import 'package:todist/modules/todos/data/sources/remote_source.dart';
+import '../../../../core/logger.dart';
 
 
 class SyncEngine {
@@ -43,6 +44,7 @@ class SyncEngine {
   /// Call this after every local write. Tries remote immediately;
   /// if it fails or we're offline, the outbox entry will be flushed later.
   Future<void> syncAfterWrite(TodoModel todo) async {
+    log.d('isOnline => $_isOnline');
     if (!_isOnline) return; // outbox already enqueued by repository
     await _flushEntry(
       OutboxEntry(
@@ -55,23 +57,19 @@ class SyncEngine {
 
   // ── Connectivity ───────────────────────────────────────────
 
-  void _watchConnectivity() {
-    _connectivitySub = Connectivity().onConnectivityChanged.listen((
-      results,
-    ) async {
+  Future<void> _watchConnectivity() async {
+    final results = await Connectivity().checkConnectivity();
+
+    _isOnline = results.any((r) => r != ConnectivityResult.none);
+
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) async {
       final wasOnline = _isOnline;
       _isOnline = results.any((r) => r != ConnectivityResult.none);
 
       if (!wasOnline && _isOnline) {
-        // Just came back online — flush outbox then pull delta
         await flush();
         await _deltaSync();
       }
-    });
-
-    // Check current state immediately
-    Connectivity().checkConnectivity().then((results) {
-      _isOnline = results.any((r) => r != ConnectivityResult.none);
     });
   }
 
@@ -181,4 +179,6 @@ class SyncEngine {
       },
     );
   }
+
+  void clear() {}
 }

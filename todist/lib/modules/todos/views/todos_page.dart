@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:todist/modules/auth/view_model/auth_notifier.dart';
 import 'package:todist/modules/todos/views/todo_item.dart';
 import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
-
-class TodoListScreen extends HookConsumerWidget {
-  const TodoListScreen({super.key});
+class TodosPage extends HookConsumerWidget {
+  const TodosPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,6 +17,14 @@ class TodoListScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: const Text('Offline-First Todo'),
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(authNotifierProvider.notifier).logout();
+            },
+            icon: Icon(Icons.exit_to_app_sharp),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Column(
@@ -39,7 +43,8 @@ class TodoListScreen extends HookConsumerWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: TextFormField(
+                    textCapitalization: TextCapitalization.sentences,
                     controller: controller,
                     decoration: const InputDecoration(
                       hintText: 'What needs to be done?',
@@ -49,7 +54,7 @@ class TodoListScreen extends HookConsumerWidget {
                         vertical: 12,
                       ),
                     ),
-                    onSubmitted: (value) {
+                    onFieldSubmitted: (value) {
                       if (value.trim().isNotEmpty) {
                         ref
                             .read(todoListProvider.notifier)
@@ -115,7 +120,11 @@ class TodoListScreen extends HookConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text('Error: $error'),
                   ],

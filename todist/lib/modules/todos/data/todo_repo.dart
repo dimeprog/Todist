@@ -10,10 +10,11 @@ class TodoRepository {
   final LocalTodoStore _local;
   final SyncEngine _syncEngine;
 
-  TodoRepository({required LocalTodoStore local, required SyncEngine syncEngine,
-  })
-    : _local = local,
-      _syncEngine = syncEngine;
+  TodoRepository({
+    required LocalTodoStore local,
+    required SyncEngine syncEngine,
+  }) : _local = local,
+       _syncEngine = syncEngine;
 
   // ── Read ───────────────────────────────────────────────────
 
@@ -114,4 +115,9 @@ class TodoRepository {
       ),
     );
   }
+
+  Future<void> clear()async{
+    await _local.clear();
+  }
+  
 }

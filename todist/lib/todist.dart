@@ -22,7 +22,7 @@ class Todist extends ConsumerWidget {
 
           // User already logged in
           if (session != null) {
-            return const TodoListScreen();
+            return const TodosPage();
           }
 
           // Not logged in
