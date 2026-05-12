@@ -1,0 +1,184 @@
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:todist/modules/todos/views/todo_item.dart';
+import 'package:todist/modules/todos/vms/todo_notifier.dart';
+
+
+class TodoListScreen extends HookConsumerWidget {
+  const TodoListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = useTextEditingController();
+    final todosAsync = ref.watch(filteredTodosProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Offline-First Todo'),
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Column(
+            children: [
+              // const TodoStatsBar(),
+              _FilterChips(),
+            ],
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          // ── Add todo input ─────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: 'What needs to be done?',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    onSubmitted: (value) {
+                      if (value.trim().isNotEmpty) {
+                        ref
+                            .read(todoListProvider.notifier)
+                            .createTodo(value.trim());
+                        controller.clear();
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filled(
+                  onPressed: () {
+                    if (controller.text.trim().isNotEmpty) {
+                      ref
+                          .read(todoListProvider.notifier)
+                          .createTodo(controller.text.trim());
+                      controller.clear();
+                    }
+                  },
+                  icon: const Icon(Icons.add),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Todo list ──────────────────────────────────────
+          Expanded(
+            child: todosAsync.when(
+              data: (todos) {
+                if (todos.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No todos yet',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  itemCount: todos.length,
+                  itemBuilder: (context, index) {
+                    return TodoItemTile(todo: todos[index]);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Error: $error'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChips extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filter = ref.watch(todoFilterProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          _buildChip(
+            context,
+            ref,
+            label: 'All',
+            filter: TodoFilter.all,
+            isSelected: filter == TodoFilter.all,
+          ),
+          const SizedBox(width: 8),
+          _buildChip(
+            context,
+            ref,
+            label: 'Active',
+            filter: TodoFilter.active,
+            isSelected: filter == TodoFilter.active,
+          ),
+          const SizedBox(width: 8),
+          _buildChip(
+            context,
+            ref,
+            label: 'Completed',
+            filter: TodoFilter.completed,
+            isSelected: filter == TodoFilter.completed,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip(
+    BuildContext context,
+    WidgetRef ref, {
+    required String label,
+    required TodoFilter filter,
+    required bool isSelected,
+  }) {
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) {
+        ref.read(todoFilterProvider.notifier).state = filter;
+      },
+    );
+  }
+}
