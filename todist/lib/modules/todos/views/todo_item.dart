@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/todo_model.dart';
-import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
 
+import '../vms/todo_notifier.dart';
 
 class TodoItemTile extends ConsumerWidget {
   final TodoModel todo;
@@ -63,7 +63,7 @@ class TodoItemTile extends ConsumerWidget {
        SyncStatus.failed =>
          Icon(Icons.error, size: 18, color: Colors.red[700]),
     };
-    
+
   }
 
   Widget _buildMoreMenu(BuildContext context, WidgetRef ref) {
@@ -155,3 +155,8 @@ class TodoItemTile extends ConsumerWidget {
     });
   }
 }
+
+
+
+
+

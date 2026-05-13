@@ -43,14 +43,13 @@ class RemoteTodoSource {
 
   /// Fetch only rows updated after [since] — delta sync
   Future<List<TodoModel>> fetchDelta(DateTime? since) async {
+    final thirtyDaysAgo = DateTime.now().subtract(Duration(days: 30));
     var query = _client
         .from(_table)
         .select()
-        .eq('user_id', _client.auth.currentUser!.id);
-
-    if (since != null) {
-      query = query.gte('updated_at', since.toIso8601String());
-    }
+        .eq('user_id', _client.auth.currentUser!.id)
+        .gte('updated_at', (since ?? thirtyDaysAgo).toIso8601String());
+    
 
     final rows = await query.order('updated_at', ascending: false);
     log.d('/// fetch from remote \n${rows.map((e) => e)}');

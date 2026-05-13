@@ -15,10 +15,8 @@ class LocalTodoStore {
     // Register adapters before opening boxes
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(SyncStatusAdapter());
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(TodoModelAdapter());
-    if (!Hive.isAdapterRegistered(2))
-      Hive.registerAdapter(OutboxOperationAdapter());
-    if (!Hive.isAdapterRegistered(3))
-      Hive.registerAdapter(OutboxEntryAdapter());
+    if (!Hive.isAdapterRegistered(2))Hive.registerAdapter(OutboxOperationAdapter());
+    if (!Hive.isAdapterRegistered(3))Hive.registerAdapter(OutboxEntryAdapter());
 
     _todoBox = await Hive.openBox<TodoModel>(_todoBoxName);
     _outboxBox = await Hive.openBox<OutboxEntry>(_outboxBoxName);
@@ -83,3 +81,6 @@ class LocalTodoStore {
     await _outboxBox.clear();
   }
 }
+
+
+

@@ -5,8 +5,6 @@ import 'package:todist/modules/todos/data/sources/remote_source.dart';
 import 'package:todist/modules/todos/data/sources/sync_engine.dart';
 import 'package:todist/modules/todos/data/todo_repo.dart';
 
-
-
 // ── Infrastructure ─────────────────────────────────────────
 
 final supabaseProvider = Provider<SupabaseClient>((ref) {
@@ -31,10 +29,20 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
   final sync = SyncEngine(local: local, remote: remote);
 
   // Start sync engine automatically
-  sync.start();
+  // sync.start();
 
   // Cleanup on dispose
   ref.onDispose(() => sync.dispose());
+
+  ref.watch(supabaseProvider).auth.onAuthStateChange.listen((e) {
+    if (e.event == AuthChangeEvent.signedIn ||
+        e.event == AuthChangeEvent.initialSession) {
+      sync.start();
+    }
+    if (e.event == AuthChangeEvent.signedOut) {
+      sync.reset();
+    }
+  });
 
   return sync;
 });

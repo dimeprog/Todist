@@ -119,5 +119,6 @@ class TodoRepository {
   Future<void> clear()async{
     await _local.clear();
   }
-  
+
 }
+

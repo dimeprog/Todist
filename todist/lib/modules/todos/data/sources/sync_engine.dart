@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:todist/models/enums/outbox_operation.dart';
 import 'package:todist/models/enums/sync_status.dart';
@@ -8,8 +9,8 @@ import 'package:todist/models/outbox_entry.dart';
 import 'package:todist/models/todo_model.dart';
 import 'package:todist/modules/todos/data/sources/local_todo_source.dart';
 import 'package:todist/modules/todos/data/sources/remote_source.dart';
-import '../../../../core/logger.dart';
 
+import '../../../../core/logger.dart';
 
 class SyncEngine {
   final LocalTodoStore _local;
@@ -19,7 +20,7 @@ class SyncEngine {
   bool _isOnline = false;
   DateTime? _lastSyncedAt;
 
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+  StreamSubscription<InternetStatus>? _connectivitySub;
   RealtimeChannel? _realtimeChannel;
 
   SyncEngine({required LocalTodoStore local, required RemoteTodoSource remote})
@@ -57,14 +58,35 @@ class SyncEngine {
 
   // ── Connectivity ───────────────────────────────────────────
 
+  // Future<void> _watchConnectivity() async {
+  //   final results = await Connectivity().checkConnectivity();
+
+  //   _isOnline = results.any((r) => r != ConnectivityResult.none);
+
+  //   _connectivitySub = Connectivity().onConnectivityChanged.listen((
+  //     results,
+  //   ) async {
+  //     log.d('Internet is status change => ${results.toString()}');
+  //     final wasOnline = _isOnline;
+  //     _isOnline = results.any((r) => r != ConnectivityResult.none);
+
+  //     if (!wasOnline && _isOnline) {
+  //       await flush();
+  //       await _deltaSync();
+  //     }
+  //   });
+  // }
   Future<void> _watchConnectivity() async {
-    final results = await Connectivity().checkConnectivity();
+    final results = await InternetConnection().hasInternetAccess;
 
-    _isOnline = results.any((r) => r != ConnectivityResult.none);
+    _isOnline = results;
 
-    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) async {
+    _connectivitySub = InternetConnection().onStatusChange.listen((
+      results,
+    ) async {
+      log.d('Internet is status change => ${results.name}');
       final wasOnline = _isOnline;
-      _isOnline = results.any((r) => r != ConnectivityResult.none);
+      _isOnline = results == InternetStatus.connected;
 
       if (!wasOnline && _isOnline) {
         await flush();
@@ -133,7 +155,7 @@ class SyncEngine {
   // ── Delta sync (pull) ──────────────────────────────────────
 
   Future<void> _deltaSync() async {
-    if (!_isOnline) return;
+    // if (!_isOnline) return;
 
     try {
       final remote = await _remote.fetchDelta(_lastSyncedAt);
@@ -180,5 +202,8 @@ class SyncEngine {
     );
   }
 
-  void clear() {}
+  void reset() {
+    _lastSyncedAt = null;
+    // _isOnline = false;
+  }
 }
