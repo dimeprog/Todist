@@ -52,3 +52,11 @@ class RegisterFailure extends AuthState {
   @override
   List<Object?> get props => throw UnimplementedError();
 }
+
+class Logout extends AuthState {
+  final String message;
+
+  Logout({this.message = "Thanks goodbye!!!"});
+  @override
+  List<Object?> get props => throw UnimplementedError();
+}

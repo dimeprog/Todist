@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/todo_model.dart';
 
-
 import '../vms/todo_notifier.dart';
 
 class TodoItemTile extends ConsumerWidget {
@@ -68,6 +67,7 @@ class TodoItemTile extends ConsumerWidget {
 
   Widget _buildMoreMenu(BuildContext context, WidgetRef ref) {
     return PopupMenuButton(
+      icon: Icon(Icons.more_vert),
       itemBuilder: (context) => [
         PopupMenuItem(
           child: const Row(

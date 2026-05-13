@@ -54,7 +54,7 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  void logout() {
-    _authRepository.logout();
+  void logout() async {
+    await _authRepository.logout().then((_) => state = Logout());
   }
 }

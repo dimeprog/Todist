@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:todist/modules/auth/view_model/auth_state.dart';
+import 'package:todist/modules/auth/views/login.dart';
 import 'package:todist/modules/todos/views/todo_item.dart';
 
 import '../../auth/view_model/auth_notifier.dart';
@@ -211,11 +213,24 @@ class TodosPage extends HookConsumerWidget {
         title: const Text('Tasks'),
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () {
-              ref.read(authNotifierProvider.notifier).logout();
+          Consumer(
+            builder: (_, WidgetRef ref, __) {
+              ref.listen(authNotifierProvider, (p, n) {
+                if (n is Logout) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginPage()),
+                    (_) => false,
+                  );
+                }
+              });
+              return IconButton(
+                onPressed: () {
+                  ref.read(authNotifierProvider.notifier).logout();
+                },
+                icon: Icon(Icons.exit_to_app_sharp),
+              );
             },
-            icon: Icon(Icons.exit_to_app_sharp),
           ),
         ],
         bottom: PreferredSize(
@@ -230,14 +245,13 @@ class TodosPage extends HookConsumerWidget {
             builder: (_, WidgetRef ref, __) {
               final filter = ref.watch(todoFilterProvider);
               return filter == TodoFilter.active
-                  ?
-               Padding(
+                  ? Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
-                               textCapitalization: TextCapitalization.sentences,
+                              textCapitalization: TextCapitalization.sentences,
                               controller: controller,
                               decoration: const InputDecoration(
                                 hintText: 'What needs to be done?',
