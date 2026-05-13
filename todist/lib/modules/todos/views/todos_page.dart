@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/modules/todos/views/todo_item.dart';
 
 import '../../auth/view_model/auth_notifier.dart';
-
 import '../vms/todo_notifier.dart';
 import 'todo_stats.dart';
 
@@ -221,56 +220,60 @@ class TodosPage extends HookConsumerWidget {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(100),
-          child: Column(
-            children: [
-              const TodoStatsBar(),
-              _FilterChips(),
-            ],
-          ),
+          child: Column(children: [const TodoStatsBar(), _FilterChips()]),
         ),
       ),
       body: Column(
         children: [
           // ── Add todo input ─────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    decoration: const InputDecoration(
-                      hintText: 'What needs to be done?',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+          Consumer(
+            builder: (_, WidgetRef ref, __) {
+              final filter = ref.watch(todoFilterProvider);
+              return filter == TodoFilter.active
+                  ?
+               Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                               textCapitalization: TextCapitalization.sentences,
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                hintText: 'What needs to be done?',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                              onSubmitted: (value) {
+                                if (value.trim().isNotEmpty) {
+                                  ref
+                                      .read(todoListProvider.notifier)
+                                      .createTodo(value.trim());
+                                  controller.clear();
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.filled(
+                            onPressed: () {
+                              if (controller.text.trim().isNotEmpty) {
+                                ref
+                                    .read(todoListProvider.notifier)
+                                    .createTodo(controller.text.trim());
+                                controller.clear();
+                              }
+                            },
+                            icon: const Icon(Icons.add),
+                          ),
+                        ],
                       ),
-                    ),
-                    onSubmitted: (value) {
-                      if (value.trim().isNotEmpty) {
-                        ref
-                            .read(todoListProvider.notifier)
-                            .createTodo(value.trim());
-                        controller.clear();
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: () {
-                    if (controller.text.trim().isNotEmpty) {
-                      ref
-                          .read(todoListProvider.notifier)
-                          .createTodo(controller.text.trim());
-                      controller.clear();
-                    }
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
+                    )
+                  : SizedBox.shrink();
+            },
           ),
 
           // ── Todo list ──────────────────────────────────────
@@ -376,11 +379,6 @@ class _FilterChips extends ConsumerWidget {
     );
   }
 }
-
-
-
-
-
 
 // class TodosPage extends HookConsumerWidget {
 //   const TodosPage({super.key});

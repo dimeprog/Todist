@@ -3,6 +3,7 @@ import 'dart:async';
 // import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:todist/core/app_local_prefs.dart';
 import 'package:todist/models/enums/outbox_operation.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/outbox_entry.dart';
@@ -30,6 +31,7 @@ class SyncEngine {
   // ── Lifecycle ──────────────────────────────────────────────
 
   Future<void> start() async {
+    _setLastSync();
     _watchConnectivity();
     _subscribeRealtime();
     await _deltaSync(); // pull any changes missed while offline
@@ -56,26 +58,15 @@ class SyncEngine {
     );
   }
 
+  void _setLastSync([DateTime? time]) {
+    AppLocalPrefs.latSyncAt = time?.toIso8601String();
+    _lastSyncedAt = AppLocalPrefs.latSyncAt != null
+        ? DateTime.tryParse(AppLocalPrefs.latSyncAt!)
+        : null;
+  }
+
   // ── Connectivity ───────────────────────────────────────────
 
-  // Future<void> _watchConnectivity() async {
-  //   final results = await Connectivity().checkConnectivity();
-
-  //   _isOnline = results.any((r) => r != ConnectivityResult.none);
-
-  //   _connectivitySub = Connectivity().onConnectivityChanged.listen((
-  //     results,
-  //   ) async {
-  //     log.d('Internet is status change => ${results.toString()}');
-  //     final wasOnline = _isOnline;
-  //     _isOnline = results.any((r) => r != ConnectivityResult.none);
-
-  //     if (!wasOnline && _isOnline) {
-  //       await flush();
-  //       await _deltaSync();
-  //     }
-  //   });
-  // }
   Future<void> _watchConnectivity() async {
     final results = await InternetConnection().hasInternetAccess;
 
@@ -155,7 +146,8 @@ class SyncEngine {
   // ── Delta sync (pull) ──────────────────────────────────────
 
   Future<void> _deltaSync() async {
-    // if (!_isOnline) return;
+    if (!_isOnline) return;
+    log.d("lastSyncAt -> ${_lastSyncedAt?.toIso8601String()} ");
 
     try {
       final remote = await _remote.fetchDelta(_lastSyncedAt);
@@ -177,7 +169,8 @@ class SyncEngine {
         }
       }
 
-      _lastSyncedAt = DateTime.now();
+      // _lastSyncedAt = DateTime.now();
+      _setLastSync(DateTime.now());
     } catch (_) {
       // Silent — will retry on next reconnect
     }

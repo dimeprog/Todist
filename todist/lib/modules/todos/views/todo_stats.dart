@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
@@ -6,13 +9,52 @@ import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
 
 
-class TodoStatsBar extends ConsumerWidget {
+class TodoStatsBar extends HookConsumerWidget {
   const TodoStatsBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(todoStatsProvider);
+    final pending = stats['pending'] ?? 0;
 
+    /// UI state
+    final showSyncing = useState(false);
+
+    /// timers
+    final showTimer = useRef<Timer?>(null);
+    final hideTimer = useRef<Timer?>(null);
+
+    useEffect(() {
+      if (pending > 0) {
+        hideTimer.value?.cancel();
+
+        /// debounce showing syncing
+        showTimer.value ??= Timer(const Duration(milliseconds: 400), () {
+          showSyncing.value = true;
+          showTimer.value = null;
+        });
+      } else {
+        showTimer.value?.cancel();
+        showTimer.value = null;
+
+        /// delay hiding to avoid flicker
+        hideTimer.value = Timer(const Duration(milliseconds: 600), () {
+          showSyncing.value = false;
+        });
+      }
+
+      return null;
+    }, [pending]);
+
+    /// cleanup
+    useEffect(() {
+      return () {
+        showTimer.value?.cancel();
+        hideTimer.value?.cancel();
+      };
+    }, const []);
+
+    
     if (stats.isEmpty) return const SizedBox.shrink();
 
     return Container(
@@ -35,7 +77,7 @@ class TodoStatsBar extends ConsumerWidget {
             count: stats['completed'] ?? 0,
             color: Colors.green,
           ),
-          if ((stats['pending'] ?? 0) > 0)
+           if (showSyncing.value)
             _StatChip(
               label: 'Syncing',
               count: stats['pending'] ?? 0,

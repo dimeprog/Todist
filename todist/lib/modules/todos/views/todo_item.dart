@@ -118,6 +118,7 @@ class TodoItemTile extends ConsumerWidget {
         builder: (context) => AlertDialog(
           title: const Text('Edit Todo'),
           content: TextField(
+             textCapitalization: TextCapitalization.sentences,
             controller: controller,
             autofocus: true,
             decoration: const InputDecoration(

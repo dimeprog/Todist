@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:todist/core/app_local_prefs.dart';
 import 'package:todist/core/failure.dart';
 import 'package:todist/core/response_data.dart';
 import 'package:todist/core/typedefs.dart';
@@ -79,6 +80,7 @@ class AuthRepositoryImpl implements AuthRepository {
   FutureResponse<bool> logout() async {
     try {
       await client.auth.signOut();
+      AppLocalPrefs.clearAll();
       return Right(ResponseData(data: true));
     } catch (e) {
       debugPrint(e.toString());

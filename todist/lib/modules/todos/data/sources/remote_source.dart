@@ -52,7 +52,7 @@ class RemoteTodoSource {
     
 
     final rows = await query.order('updated_at', ascending: false);
-    log.d('/// fetch from remote \n${rows.map((e) => e)}');
+    log.d('/// fetch from remote \n${rows.length}');
     return rows.map(TodoModel.fromRemoteJson).toList();
   }
 
