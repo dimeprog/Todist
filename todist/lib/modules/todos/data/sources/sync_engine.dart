@@ -10,7 +10,6 @@ import 'package:todist/models/outbox_entry.dart';
 import 'package:todist/models/todo_model.dart';
 import 'package:todist/modules/todos/data/sources/local_todo_source.dart';
 import 'package:todist/modules/todos/data/sources/remote_source.dart';
-
 import '../../../../core/logger.dart';
 
 class SyncEngine {
@@ -146,7 +145,7 @@ class SyncEngine {
   // ── Delta sync (pull) ──────────────────────────────────────
 
   Future<void> _deltaSync() async {
-    if (!_isOnline) return;
+    // if (!_isOnline) return;
     log.d("lastSyncAt -> ${_lastSyncedAt?.toIso8601String()} ");
 
     try {

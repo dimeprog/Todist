@@ -47,6 +47,9 @@ class AuthRepositoryImpl implements AuthRepository {
           data: UserModel(email: result.user!.email!, id: result.user!.id),
         ),
       );
+    } on AuthException catch (e) {
+      final errorMsg = AuthErrorHandler.getMessage(e);
+      return Left(Failure(errorMsg));
     } catch (e) {
       debugPrint(e.toString());
       return Left(Failure(e.toString()));
@@ -65,6 +68,9 @@ class AuthRepositoryImpl implements AuthRepository {
           data: UserModel(email: result.user!.email!, id: result.user!.id),
         ),
       );
+    } on AuthException catch (e) {
+      final errorMsg = AuthErrorHandler.getMessage(e);
+      return Left(Failure(errorMsg));
     } catch (e) {
       debugPrint(e.toString());
       return Left(Failure(e.toString()));
@@ -86,5 +92,55 @@ class AuthRepositoryImpl implements AuthRepository {
       debugPrint(e.toString());
       return Left(Failure(e.toString()));
     }
+  }
+}
+
+class AuthErrorHandler {
+  static String getMessage(Object error) {
+    if (error is AuthException) {
+      final message = error.message.toLowerCase();
+      debugPrint("Supabase:$message");
+
+      // Network
+      if (message.contains('socketexception')) {
+        return 'No internet connection.';
+      }
+
+      // Email errors
+      if (message.contains('invalid email')) {
+        return 'Please enter a valid email address.';
+      }
+
+      if (message.contains('email not confirmed')) {
+        return 'Please verify your email before logging in.';
+      }
+
+      if (message.contains('user already registered')) {
+        return 'An account with this email already exists.';
+      }
+
+      // Password errors
+      if (message.contains('password')) {
+        return 'Password must be at least 6 characters.';
+      }
+
+      // Login errors
+      if (message.contains('invalid login credentials')) {
+        return 'Incorrect email or password.';
+      }
+
+      // Network
+      if (message.contains('network')) {
+        return 'No internet connection.';
+      }
+      // Network
+      if (message.contains('socketexception')) {
+        return 'No internet connection.';
+      }
+
+      return error.message;
+    }
+
+    return 'Something went wrong. Please try again.';
   }
 }
