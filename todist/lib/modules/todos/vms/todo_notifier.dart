@@ -238,29 +238,42 @@ class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
 
   // ── Actions ────────────────────────────────────────────────
 
-  Future<void> createTodo(String title) async {
-    if (title.trim().isEmpty) return;
+  // Future<void> createTodo(String title) async {
+  //   if (title.trim().isEmpty) return;
 
-    // Optimistic update
-    final tempTodo = TodoModel(
-      title: title.trim(),
-      syncStatus: SyncStatus.pending,
-    );
+  //   // Optimistic update
+  //   final tempTodo = TodoModel(
+  //     title: title.trim(),
+  //     syncStatus: SyncStatus.pending,
+  //   );
 
-    state = AsyncData([tempTodo, ...state.requireValue]);
+  //   state = AsyncData([tempTodo, ...state.requireValue]);
+
+  //   try {
+  //     await _repository.create(title.trim());
+
+  //     // // Replace temp with actual
+  //     // state = AsyncData([
+  //     //   created,
+  //     //   ...state.requireValue.where((t) => t.localId != tempTodo.localId),
+  //     // ]);
+  //   } catch (e) {
+  //     // Rollback on error
+  //     state = AsyncData(
+  //       state.requireValue.where((t) => t.localId != tempTodo.localId).toList(),
+  //     );
+  //     rethrow;
+  //   }
+  // }
+  Future<void> createTodo(TodoModel todo) async {
+    state = AsyncData([todo, ...state.requireValue]);
 
     try {
-      await _repository.create(title.trim());
-
-      // // Replace temp with actual
-      // state = AsyncData([
-      //   created,
-      //   ...state.requireValue.where((t) => t.localId != tempTodo.localId),
-      // ]);
+      await _repository.create(todo);
     } catch (e) {
       // Rollback on error
       state = AsyncData(
-        state.requireValue.where((t) => t.localId != tempTodo.localId).toList(),
+        state.requireValue.where((t) => t.localId != todo.localId).toList(),
       );
       rethrow;
     }

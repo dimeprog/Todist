@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:todist/core/extensions.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/todo_model.dart';
 
@@ -14,31 +15,55 @@ class TodoItemTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: ListTile(
-        leading: Checkbox(
-          value: todo.isCompleted,
-          onChanged: (_) {
-            ref.read(todoListProvider.notifier).toggleTodo(todo);
-          },
-        ),
-        title: Text(
-          todo.title,
-          style: TextStyle(
-            decoration: todo.isCompleted
-                ? TextDecoration.lineThrough
-                : TextDecoration.none,
-            color: todo.isCompleted ? Colors.grey : null,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            contentPadding: (todo.dueDate != null) ?EdgeInsets.zero: const EdgeInsets.symmetric( vertical: 4),
+            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+            leading: Checkbox(
+              value: todo.isCompleted,
+              onChanged: (_) {
+                ref.read(todoListProvider.notifier).toggleTodo(todo);
+              },
+            ),
+            title: Text(
+              todo.title,
+              style: TextStyle(
+                fontSize: 14,
+                decoration: todo.isCompleted
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
+                color: todo.isCompleted ? Colors.grey : null,
+              ),
+            ),
+            subtitle: _buildSubtitle(),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSyncStatusIcon(context),
+                const SizedBox(width: 8),
+                _buildMoreMenu(context, ref),
+              ],
+            ),
           ),
-        ),
-        subtitle: _buildSubtitle(),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildSyncStatusIcon(context),
-            const SizedBox(width: 8),
-            _buildMoreMenu(context, ref),
-          ],
-        ),
+          // SizedBox(height: 4),
+          if(todo.dueDate != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4).copyWith(bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month, size: 14, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  todo.dueDate?.toFriendlyFormat ?? "",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

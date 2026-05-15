@@ -1,10 +1,9 @@
 import 'package:hive/hive.dart';
+import 'package:todist/core/extensions.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:uuid/uuid.dart';
 
 part 'todo_model.g.dart';
-
-
 
 @HiveType(typeId: 1)
 class TodoModel extends HiveObject {
@@ -38,6 +37,24 @@ class TodoModel extends HiveObject {
   @HiveField(9)
   final String? userId;
 
+  @HiveField(10)
+  final String? description;
+
+  @HiveField(11)
+  final DateTime? dueDate;
+
+  @HiveField(12)
+  final DateTime? reminderAt; // New: trigger time for reminder
+
+  @HiveField(13)
+  final String? pushToken; // User's device token
+
+  @HiveField(14)
+  final bool? reminderSent;
+  
+
+
+
   TodoModel({
     String? localId,
     this.userId,
@@ -49,6 +66,11 @@ class TodoModel extends HiveObject {
     DateTime? updatedAt,
     this.retryCount = 0,
     this.isDeleted = false,
+    this.reminderAt,
+    this.reminderSent = false,
+    this.pushToken,
+    this.dueDate,
+    this.description,
   }) : localId = localId ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
@@ -64,6 +86,11 @@ class TodoModel extends HiveObject {
     int? retryCount,
     bool? isDeleted,
     String? userId,
+    DateTime? reminderAt,
+    DateTime? dueDate,
+    bool? reminderSent,
+    String? pushToken,
+    String? description,
   }) {
     return TodoModel(
       localId: localId ?? this.localId,
@@ -76,6 +103,11 @@ class TodoModel extends HiveObject {
       retryCount: retryCount ?? this.retryCount,
       isDeleted: isDeleted ?? this.isDeleted,
       userId:  userId?? this.userId,
+      dueDate: dueDate ?? this.dueDate,
+      reminderAt: reminderAt ?? this.reminderAt,
+      reminderSent: reminderSent ?? this.reminderSent,
+      pushToken: pushToken ?? this.pushToken,
+      description: description ?? this.description
     );
   }
 
@@ -87,7 +119,12 @@ class TodoModel extends HiveObject {
     'is_deleted': isDeleted,
     'updated_at': updatedAt.toIso8601String(),
     "created_at": createdAt.toIso8601String(),
-  };
+    "due_date": dueDate?.toIso8601String(),
+    "reminder_at": reminderAt?.toIso8601String(),
+    "reminder_sent": reminderSent,
+    "description": description,
+    "push_token": pushToken,
+  }.removeNullValues();
 
   factory TodoModel.fromRemoteJson(Map<String, dynamic> json) => TodoModel(
     localId: json['local_id'] as String,
@@ -99,5 +136,18 @@ class TodoModel extends HiveObject {
     createdAt: DateTime.parse(json['created_at'] as String),
     updatedAt: DateTime.parse(json['updated_at'] as String),
     isDeleted: json['is_deleted'] as bool? ?? false,
+    dueDate: json['due_date'] != null
+        ? DateTime.parse(json['due_date'] as String)
+        : null,
+    reminderAt: json['reminder_at'] != null
+        ? DateTime.parse(json['reminder_at'] as String)
+        : null,
+    reminderSent: json['reminder_sent'] as bool? ?? false,
+    description: json['description'] as String?,
+    pushToken: json['push_token'] as String?,
+
+
+
+      
   );
 }

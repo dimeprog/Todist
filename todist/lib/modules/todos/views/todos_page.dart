@@ -4,10 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/modules/auth/view_model/auth_state.dart';
 import 'package:todist/modules/auth/views/login.dart';
 import 'package:todist/modules/todos/views/todo_item.dart';
+
 import '../../auth/view_model/auth_notifier.dart';
 import '../vms/todo_notifier.dart';
+import 'todo_sheet.dart';
 import 'todo_stats.dart';
-
 
 class TodosPage extends HookConsumerWidget {
   const TodosPage({super.key});
@@ -47,57 +48,67 @@ class TodosPage extends HookConsumerWidget {
           child: Column(children: [const TodoStatsBar(), _FilterChips()]),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        shape: CircleBorder(),
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          final todo = await TodoSheet.show(context);
+          if (todo != null) {
+            ref.read(todoListProvider.notifier).createTodo(todo);
+          }
+        },
+      ),
       body: Column(
         children: [
           // ── Add todo input ─────────────────────────────────
-          Consumer(
-            builder: (_, WidgetRef ref, __) {
-              final filter = ref.watch(todoFilterProvider);
-              return filter == TodoFilter.active
-                  ? Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              textCapitalization: TextCapitalization.sentences,
-                              controller: controller,
-                              decoration: const InputDecoration(
-                                hintText: 'What needs to be done?',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              onSubmitted: (value) {
-                                if (value.trim().isNotEmpty) {
-                                  ref
-                                      .read(todoListProvider.notifier)
-                                      .createTodo(value.trim());
-                                  controller.clear();
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton.filled(
-                            onPressed: () {
-                              if (controller.text.trim().isNotEmpty) {
-                                ref
-                                    .read(todoListProvider.notifier)
-                                    .createTodo(controller.text.trim());
-                                controller.clear();
-                              }
-                            },
-                            icon: const Icon(Icons.add),
-                          ),
-                        ],
-                      ),
-                    )
-                  : SizedBox.shrink();
-            },
-          ),
+          // Consumer(
+          //   builder: (_, WidgetRef ref, __) {
+          //     final filter = ref.watch(todoFilterProvider);
+          //     return filter == TodoFilter.active
+          //         ? Padding(
+          //             padding: const EdgeInsets.all(16.0),
+          //             child: Row(
+          //               children: [
+          //                 Expanded(
+          //                   child: TextField(
+          //                     textCapitalization: TextCapitalization.sentences,
+          //                     controller: controller,
+          //                     decoration: const InputDecoration(
+          //                       hintText: 'What needs to be done?',
+          //                       border: OutlineInputBorder(),
+          //                       contentPadding: EdgeInsets.symmetric(
+          //                         horizontal: 16,
+          //                         vertical: 12,
+          //                       ),
+          //                     ),
+          //                     onSubmitted: (value) {
+          //                       // if (value.trim().isNotEmpty) {
+          //                       //   ref
+          //                       //       .read(todoListProvider.notifier)
+          //                       //       .createTodo(value.trim());
+          //                       //   controller.clear();
+          //                       // }
+          //                     },
+          //                   ),
+          //                 ),
+          //                 const SizedBox(width: 8),
+          //                 IconButton.filled(
+          //                   onPressed: () {
+          //                     // if (controller.text.trim().isNotEmpty) {
+          //                     //   ref
+          //                     //       .read(todoListProvider.notifier)
+          //                     //       .createTodo(controller.text.trim());
+          //                     //   controller.clear();
+          //                     // }
+          //                   },
+          //                   icon: const Icon(Icons.add),
+          //                 ),
+          //               ],
+          //             ),
+          //           )
+          //         : SizedBox.shrink();
+          //   },
+          // ),
 
           // ── Todo list ──────────────────────────────────────
           Expanded(
@@ -126,7 +137,8 @@ class TodosPage extends HookConsumerWidget {
                   );
                 }
 
-                return ListView.builder(
+                return ListView.separated(
+                  separatorBuilder: (context, index) => const SizedBox(height: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   itemCount: todos.length,
                   itemBuilder: (context, index) {

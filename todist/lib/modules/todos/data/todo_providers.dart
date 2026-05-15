@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:todist/core/notification_service.dart';
 import 'package:todist/modules/todos/data/sources/local_todo_source.dart';
 import 'package:todist/modules/todos/data/sources/remote_source.dart';
 import 'package:todist/modules/todos/data/sources/sync_engine.dart';
@@ -50,5 +51,9 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
 final todoRepositoryProvider = Provider<TodoRepository>((ref) {
   final local = ref.watch(localStoreProvider);
   final syncEngine = ref.watch(syncEngineProvider);
-  return TodoRepository(local: local, syncEngine: syncEngine);
+  return TodoRepository(
+    local: local,
+    syncEngine: syncEngine,
+    notificationService: notificationController,
+  );
 });
