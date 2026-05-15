@@ -1,3 +1,4 @@
+import 'package:todist/core/notification_service.dart';
 import 'package:todist/models/enums/outbox_operation.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/outbox_entry.dart';
@@ -9,12 +10,16 @@ import 'sources/local_todo_source.dart';
 class TodoRepository {
   final LocalTodoStore _local;
   final SyncEngine _syncEngine;
+  final NotificationsController _notificationService;
 
   TodoRepository({
     required LocalTodoStore local,
     required SyncEngine syncEngine,
+    required NotificationsController notificationService
   }) : _local = local,
-       _syncEngine = syncEngine;
+       _syncEngine = syncEngine,
+       _notificationService = notificationService;
+       
 
   // ── Read ───────────────────────────────────────────────────
 
@@ -24,13 +29,20 @@ class TodoRepository {
 
   // ── Write ──────────────────────────────────────────────────
 
-  Future<TodoModel> create(String title) async {
-    final todo = TodoModel(title: title, syncStatus: SyncStatus.pending);
+  Future<TodoModel> create(TodoModel todo) async {
+    // final todo = TodoModel(title: title, syncStatus: SyncStatus.pending);
 
     // 1. Write to local immediately
     await _local.save(todo);
+    // 2. Schedule local notification
+    await _notificationService.scheduleLocalNotification(
+      id: todo.hashCode,
+      body: todo.description ?? "",
+      title: todo.title,
+      scheduledTime: todo.reminderAt ?? todo.createdAt.add(Duration(hours: 24)),
+    );
 
-    // 2. Enqueue to outbox (always — dequeued on success)
+    // 3. Enqueue to outbox (always — dequeued on success)
     await _local.enqueue(
       OutboxEntry(
         localId: todo.localId,
@@ -39,8 +51,10 @@ class TodoRepository {
       ),
     );
 
-    // 3. Attempt remote sync — outbox handles failure
+    // 4. Attempt remote sync — outbox handles failure
     await _syncEngine.syncAfterWrite(todo);
+
+    
 
     return todo;
   }

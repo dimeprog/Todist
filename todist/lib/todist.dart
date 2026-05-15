@@ -11,26 +11,31 @@ class Todist extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final supabase = Supabase.instance.client;
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "Todist",
-      theme: AppTheme.darkTheme,
-      home: StreamBuilder<AuthState>(
-        stream: supabase.auth.onAuthStateChange,
-        builder: (context, snapshot) {
-          // Current persisted session
-          final session = supabase.auth.currentSession;
-
-          // User already logged in
-          if (session != null) {
-            return const TodosPage();
-          }
-
-          // Not logged in
-          return const LoginPage();
-        },
-      ),
+    return GestureDetector(
+      onTap: (){
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "Todist",
+        theme: AppTheme.darkTheme,
+        home: StreamBuilder<AuthState>(
+          stream: supabase.auth.onAuthStateChange,
+          builder: (context, snapshot) {
+            // Current persisted session
+            final session = supabase.auth.currentSession;
       
+            // User already logged in
+            if (session != null) {
+              return const TodosPage();
+            }
+      
+            // Not logged in
+            return const LoginPage();
+          },
+        ),
+        
+      ),
     );
   }
 }

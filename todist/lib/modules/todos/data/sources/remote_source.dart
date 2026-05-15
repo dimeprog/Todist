@@ -23,7 +23,7 @@ class RemoteTodoSource {
         )
         .select()
         .single();
-    log.d('/// write to remote \n${todo.toRemoteJson()}');
+    log.d(todo.toRemoteJson());
     return TodoModel.fromRemoteJson(response);
   }
 
