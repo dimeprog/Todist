@@ -298,6 +298,22 @@ class TodoListNotifier extends AsyncNotifier<List<TodoModel>> {
     }
   }
 
+  Future<void> updateTodo(TodoModel todo)async{
+       final updated = todo.copyWith(
+      syncStatus: SyncStatus.pending,
+      updatedAt: DateTime.now(),
+    );
+
+    _replaceInState(updated);
+
+    try {
+      await _repository.update(todo);
+    } catch (e) {
+      _replaceInState(todo);
+      rethrow;
+    }
+  } 
+
   Future<void> updateTitle(TodoModel todo, String newTitle) async {
     if (newTitle.trim().isEmpty) return;
 

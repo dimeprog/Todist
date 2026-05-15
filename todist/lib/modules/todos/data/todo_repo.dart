@@ -87,6 +87,19 @@ class TodoRepository {
     return updated;
   }
 
+  Future<TodoModel> update(TodoModel todo) async {
+    final updated = todo.copyWith(
+      syncStatus: SyncStatus.pending,
+      updatedAt: DateTime.now(),
+    );
+
+    await _local.save(updated);
+    await _enqueueOrReplace(updated);
+    await _syncEngine.syncAfterWrite(updated);
+
+    return updated;
+  }
+
   Future<void> delete(TodoModel todo) async {
     final deleted = todo.copyWith(
       isDeleted: true,

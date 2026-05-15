@@ -74,24 +74,6 @@
             </intent-filter>
         </activity>
         
-        <!-- ============================================ -->
-        <!-- FLUTTER LOCAL NOTIFICATIONS RECEIVERS        -->
-        <!-- ============================================ -->
-        
-        <!-- For scheduled notifications -->
-        <receiver 
-            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
-            android:exported="true" />
-        
-        <!-- For boot completed - reschedule notifications after reboot -->
-        <receiver 
-            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
-        </receiver>
         
         <!-- DO NOT add ScheduledNotificationAlarmReceiver - it doesn't exist -->
         <!-- Remove this line if you have it:

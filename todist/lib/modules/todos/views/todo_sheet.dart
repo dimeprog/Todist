@@ -7,25 +7,28 @@ import 'package:todist/models/todo_model.dart';
 import 'package:todist/utils/custom_datetime_picker.dart';
 
 class TodoSheet extends HookConsumerWidget {
-  const TodoSheet({super.key});
+  final TodoModel? todo;
+  const TodoSheet({super.key, this.todo});
 
-  static Future<TodoModel?> show(BuildContext context) {
+  static Future<TodoModel?> show(BuildContext context, {TodoModel? todo}) {
     return showModalBottomSheet<TodoModel?>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => const TodoSheet(),
+      builder: (context) => TodoSheet(todo: todo),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final titleController = useTextEditingController();
-    final descriptionController = useTextEditingController();
-    final selectedDate = useState<DateTime?>(null);
-    final reminderOn= useState<bool>(false);
+    final titleController = useTextEditingController(text: todo?.title);
+    final descriptionController = useTextEditingController(
+      text: todo?.description,
+    );
+    final selectedDate = useState<DateTime?>(todo?.dueDate);
+    final reminderOn = useState<bool>(todo?.reminderAt != null);
     final formkey = useState(GlobalKey<FormState>());
 
     return Container(
@@ -36,13 +39,16 @@ class TodoSheet extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Create Task', style: TextStyle(fontSize: 20)),
+            Text(
+              todo == null ? 'Create Task' : 'Update Task',
+              style: TextStyle(fontSize: 20),
+            ),
             const SizedBox(height: 16),
             TextFormField(
               textCapitalization: TextCapitalization.sentences,
               controller: titleController,
               maxLength: 150,
-              
+
               decoration: const InputDecoration(
                 hintText: 'Title',
                 enabledBorder: OutlineInputBorder(
@@ -81,13 +87,11 @@ class TodoSheet extends HookConsumerWidget {
               initialValue: selectedDate.value,
               firstDate: DateTime.now(),
               lastDate: DateTime.now().add(const Duration(days: 365)),
-              onSaved: (dateTime){
+              onSaved: (dateTime) {
                 selectedDate.value = dateTime;
-                
               },
-              onChanged: (dateTime){
-                 selectedDate.value = dateTime;
-               
+              onChanged: (dateTime) {
+                selectedDate.value = dateTime;
               },
               validator: (value) {
                 if (value == null) return null;
@@ -97,37 +101,55 @@ class TodoSheet extends HookConsumerWidget {
                 return null;
               },
             ),
-             const SizedBox(height: 20),
-             Row(
+            const SizedBox(height: 20),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-              const Text('Remind me', style: TextStyle(fontSize: 14, color: Colors.white),),
-              SizedBox(
-                height: 35,
-                width: 50,
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: Switch(
-                    activeThumbColor: Colors.white,
-                    value: reminderOn.value,
-                    onChanged: (value) {
-                      reminderOn.value = value;
-                    },
+                const Text(
+                  'Remind me',
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+                SizedBox(
+                  height: 35,
+                  width: 50,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: Switch(
+                      activeThumbColor: Colors.white,
+                      value: reminderOn.value,
+                      onChanged: (value) {
+                        reminderOn.value = value;
+                      },
+                    ),
                   ),
                 ),
-              ),
-             ],),
-           
+              ],
+            ),
+
             const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: () {
                   if (formkey.value.currentState!.validate()) {
+                    if (todo != null) {
+                      final t = todo?.copyWith(
+                        title: titleController.text,
+                        description: descriptionController.text,
+                        dueDate: selectedDate.value?.toUtc(),
+                        reminderAt: reminderOn.value
+                            ? selectedDate.value?.setReminder.toUtc()
+                            : null,
+                        pushToken: AppLocalPrefs.fcm,
+                      );
+                      Navigator.pop(context, t);
+                    }
                     final t = TodoModel(
                       title: titleController.text,
                       description: descriptionController.text,
-                      dueDate: selectedDate.value,
-                      reminderAt: reminderOn.value ? selectedDate.value?.setReminder : null,
+                      dueDate: selectedDate.value?.toUtc(),
+                      reminderAt: reminderOn.value
+                          ? selectedDate.value?.setReminder.toUtc()
+                          : null,
                       pushToken: AppLocalPrefs.fcm,
                     );
                     // log.d(t.toRemoteJson());

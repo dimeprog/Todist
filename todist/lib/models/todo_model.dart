@@ -133,14 +133,14 @@ class TodoModel extends HiveObject {
     userId: json['user_id'] as String,
     isCompleted: json['is_completed'] as bool? ?? false,
     syncStatus: SyncStatus.synced,
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
+    createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
+    updatedAt: DateTime.parse(json['updated_at'] as String).toLocal(),
     isDeleted: json['is_deleted'] as bool? ?? false,
     dueDate: json['due_date'] != null
-        ? DateTime.parse(json['due_date'] as String)
+        ? DateTime.parse(json['due_date'] as String).toLocal()
         : null,
     reminderAt: json['reminder_at'] != null
-        ? DateTime.parse(json['reminder_at'] as String)
+        ? DateTime.parse(json['reminder_at'] as String).toLocal()
         : null,
     reminderSent: json['reminder_sent'] as bool? ?? false,
     description: json['description'] as String?,
