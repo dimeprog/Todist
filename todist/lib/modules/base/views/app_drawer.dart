@@ -7,14 +7,14 @@ import 'package:todist/main.dart';
 import 'package:todist/modules/profile/vms/profile_provider.dart';
 import 'package:todist/modules/settings/views/settings_page.dart';
 import 'package:todist/modules/todos/data/todo_providers.dart';
-
 import '../../auth/view_model/auth_notifier.dart';
 import '../../profile/views/profile_page.dart';
 import '../../todos/vms/todolist_provider.dart';
 
+
+
 class CustomDrawer extends ConsumerWidget {
   const CustomDrawer({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(profileProvider).valueOrNull;

@@ -21,6 +21,8 @@ abstract class ProfileRepository {
   FutureResponse<UserModel> uploadAvatar(String filePath);
   FutureResponse<bool> deleteAvatar();
   FutureResponse<void> updateFcmToken(String fcmToken);
+
+  /// Streak(),
 }
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
