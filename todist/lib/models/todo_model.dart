@@ -119,8 +119,8 @@ class TodoModel extends HiveObject {
     'is_deleted': isDeleted,
     'updated_at': updatedAt.toIso8601String(),
     "created_at": createdAt.toIso8601String(),
-    "due_date": dueDate?.toIso8601String(),
-    "reminder_at": reminderAt?.toIso8601String(),
+    "due_date": dueDate?.toUtc().toIso8601String(),
+    "reminder_at": reminderAt?.toUtc().toIso8601String(),
     "reminder_sent": reminderSent,
     "description": description,
     "push_token": pushToken,
@@ -133,14 +133,14 @@ class TodoModel extends HiveObject {
     userId: json['user_id'] as String,
     isCompleted: json['is_completed'] as bool? ?? false,
     syncStatus: SyncStatus.synced,
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
+    createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
+    updatedAt: DateTime.parse(json['updated_at'] as String).toLocal(),
     isDeleted: json['is_deleted'] as bool? ?? false,
     dueDate: json['due_date'] != null
-        ? DateTime.parse(json['due_date'] as String)
+        ? DateTime.parse(json['due_date'] as String).toLocal()
         : null,
     reminderAt: json['reminder_at'] != null
-        ? DateTime.parse(json['reminder_at'] as String)
+        ? DateTime.parse(json['reminder_at'] as String).toLocal()
         : null,
     reminderSent: json['reminder_sent'] as bool? ?? false,
     description: json['description'] as String?,

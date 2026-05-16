@@ -53,10 +53,36 @@ class RegisterFailure extends AuthState {
   List<Object?> get props => throw UnimplementedError();
 }
 
-class Logout extends AuthState {
-  final String message;
+// Logout states
+class LogoutProcessing extends AuthState {
+  final String? message;
+  LogoutProcessing({ this.message});
 
-  Logout({this.message = "Thanks goodbye!!!"});
   @override
-  List<Object?> get props => throw UnimplementedError();
+  List<Object?> get props => [];
+}
+
+class LogoutSuccess extends AuthState {
+  final String message;
+  LogoutSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LogoutFailure extends AuthState {
+  final String message;
+  LogoutFailure({required this.message});
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LogoutNeedsAction extends AuthState {
+  final int pendingCount;
+  final bool hasInternet;
+  LogoutNeedsAction({required this.pendingCount, required this.hasInternet});
+   
+  @override
+  List<Object?> get props => [pendingCount, hasInternet];
 }

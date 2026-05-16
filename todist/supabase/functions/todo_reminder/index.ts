@@ -218,6 +218,8 @@ async function sendPush(todo: Todo) {
         },
         data: {
           todo_id: todo.id,
+          user_id: todo.user_id,
+          local_id: todo.local_id,
           type: "reminder",
           title: todo.title,
           description: todo.description || "",

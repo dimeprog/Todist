@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:todist/core/logger.dart';
 import 'package:todist/models/enums/outbox_operation.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/outbox_entry.dart';
@@ -20,6 +21,7 @@ class LocalTodoStore {
 
     _todoBox = await Hive.openBox<TodoModel>(_todoBoxName);
     _outboxBox = await Hive.openBox<OutboxEntry>(_outboxBoxName);
+    log.d('Boxes opened');
   }
 
   // ── Todo CRUD ──────────────────────────────────────────────
@@ -30,6 +32,7 @@ class LocalTodoStore {
   }
 
   TodoModel? getByLocalId(String localId) => _todoBox.get(localId);
+  TodoModel? getById(String id) => _todoBox.get(id);
 
   Future<void> save(TodoModel todo) async {
     await _todoBox.put(todo.localId, todo);

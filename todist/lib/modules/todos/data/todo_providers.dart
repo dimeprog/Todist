@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:todist/core/di.dart';
 import 'package:todist/core/notification_service.dart';
 import 'package:todist/modules/todos/data/sources/local_todo_source.dart';
 import 'package:todist/modules/todos/data/sources/remote_source.dart';
@@ -12,8 +13,9 @@ final supabaseProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
 
-final localStoreProvider = Provider<LocalTodoStore>((ref) {
-  final store = LocalTodoStore();
+final localStoreProvider =  Provider<LocalTodoStore>((ref){
+  // final store = LocalTodoStore();
+  final store = getIt<LocalTodoStore>();
   // Init is called separately in main.dart before runApp
   return store;
 });
