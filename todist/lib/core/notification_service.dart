@@ -318,7 +318,7 @@ class NotificationsController {
 
       if (todo != null) {
         // Open TodoDetails bottom sheet
-        TodoDetails.show(context, todo: todo);
+        TodoDetails.show(context, todoId: todo.localId);
       } else {
         // Handle error - todo not found
         log.e("Todo not found with ID: $payload");

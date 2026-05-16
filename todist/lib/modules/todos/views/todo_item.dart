@@ -15,7 +15,7 @@ class TodoItemTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => TodoDetails.show(context, todo: todo),
+      onTap: () => TodoDetails.show(context, todoId: todo.localId),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Column(

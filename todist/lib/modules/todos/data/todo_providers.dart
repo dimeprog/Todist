@@ -13,7 +13,7 @@ final supabaseProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
 
-final localStoreProvider = Provider<LocalTodoStore>((ref) {
+final localStoreProvider =  Provider<LocalTodoStore>((ref){
   // final store = LocalTodoStore();
   final store = getIt<LocalTodoStore>();
   // Init is called separately in main.dart before runApp

@@ -16,15 +16,12 @@ Future<void> setUp() async {
     anonKey: supabaseannonKey,
     debug: kDebugMode,
   );
-  getIt.registerSingleton<LocalTodoStore>(LocalTodoStore()..init());
+  getIt.registerLazySingletonAsync<LocalTodoStore>(() async {
+    final localStore = LocalTodoStore();
+    await localStore.init();
+    return localStore;
+  });
+  // Wait for initialization
+  await getIt.isReady<LocalTodoStore>();
 
-  // // Local Notifications
-  // final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  // Notification Service
-  // getIt.registerSingleton<NotificationsController>(
-  //   NotificationsController(
-  //     firebaseMessaging: FirebaseMessaging.instance,
-  //     flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-  //   ),
-  // );
 }
