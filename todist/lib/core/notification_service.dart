@@ -183,7 +183,7 @@ class NotificationsController {
   }
 
   bool _isDuplicateNotification(String messageId) {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    // final now = DateTime.now().millisecondsSinceEpoch;
 
     // Clean up old entries (older than deduplication window)
     _processedNotificationIds.removeWhere((id) {
