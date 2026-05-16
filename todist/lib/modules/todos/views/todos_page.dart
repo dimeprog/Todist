@@ -6,6 +6,7 @@ import 'package:todist/modules/todos/views/todo_item.dart';
 import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
 import '../../auth/view_model/auth_notifier.dart';
+import '../../base/views/app_drawer.dart';
 import '../vms/todolist_provider.dart';
 import 'todo_sheet.dart';
 import 'todo_stats.dart';
@@ -48,6 +49,8 @@ class TodosPage extends HookConsumerWidget {
           child: Column(children: [const TodoStatsBar(), _FilterChips()]),
         ),
       ),
+      drawer: CustomDrawer(), 
+      
       floatingActionButton: FloatingActionButton(
         shape: CircleBorder(),
         child: const Icon(Icons.add),
