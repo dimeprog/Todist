@@ -11,7 +11,17 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   build() {
     _authRepository = ref.read(authRepoProvider);
-    return AuthInitial();
+    return onStart();
+  }
+
+  AuthState onStart() {
+    final user = _authRepository.getCurrentUser();
+    if (user != null) {
+      return Authenticated(user: user);
+    } else {
+      return AuthInitial();
+    }
+
   }
 
   void login({required String email, required String password}) async {
@@ -60,7 +70,7 @@ class AuthNotifier extends Notifier<AuthState> {
       await _authRepository.logout().then(
         (_) => state = LogoutSuccess(message: 'Logout successful'),
       );
-      
+
     } catch (e) {
       state = LogoutFailure(message: e.toString());
     }

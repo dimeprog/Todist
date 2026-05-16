@@ -3,6 +3,13 @@ import 'package:todist/models/user_model.dart';
 
 abstract class AuthState extends Equatable {}
 
+class Authenticated extends AuthState {
+  final UserModel user;
+  Authenticated({required this.user});
+  @override
+  List<Object?> get props => [user];
+}
+
 class AuthInitial extends AuthState {
   @override
   List<Object?> get props => throw UnimplementedError();

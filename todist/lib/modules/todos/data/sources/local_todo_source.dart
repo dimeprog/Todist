@@ -31,6 +31,15 @@ class LocalTodoStore {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
+  List<TodoModel> getPending() {
+    return _todoBox.values
+        .where((t) => !t.isDeleted && t.syncStatus == SyncStatus.pending)
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+
+
   TodoModel? getByLocalId(String localId) => _todoBox.get(localId);
   TodoModel? getById(String id) => _todoBox.get(id);
 

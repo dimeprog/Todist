@@ -3,11 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-
-import 'package:todist/modules/auth/view_model/auth_state.dart';
+import 'package:todist/main.dart';
+import 'package:todist/modules/profile/vms/profile_provider.dart';
 import 'package:todist/modules/settings/views/settings_page.dart';
-
+import 'package:todist/modules/todos/data/todo_providers.dart';
 
 import '../../auth/view_model/auth_notifier.dart';
 import '../../profile/views/profile_page.dart';
@@ -17,8 +16,7 @@ class CustomDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
-    final user = authState is LoginSuccess ? authState.user : null;
+    final user = ref.watch(profileProvider).valueOrNull;
 
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -28,6 +26,7 @@ class CustomDrawer extends ConsumerWidget {
           // Header with User Info
           DrawerHeader(
             decoration: BoxDecoration(
+              // color: Colors.white,
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -37,55 +36,59 @@ class CustomDrawer extends ConsumerWidget {
                 ],
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Avatar
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Avatar
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: user?.avatarUrl != null
+                          ? Image.network(
+                              user!.avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _buildDefaultAvatar(),
+                            )
+                          : _buildDefaultAvatar(),
+                    ),
                   ),
-                  child: ClipOval(
-                    child: user?.avatarUrl != null
-                        ? Image.network(
-                            user!.avatarUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
-                          )
-                        : _buildDefaultAvatar(),
+                  const SizedBox(height: 12),
+                  // User Name
+                  Text(
+                    user?.fullName ?? 'Guest User',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                // User Name
-                Text(
-                  user?.fullName ?? 'Guest User',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  const SizedBox(height: 4),
+                  // User Email
+                  Text(
+                    user?.email ?? 'Not signed in',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                // User Email
-                Text(
-                  user?.email ?? 'Not signed in',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -350,10 +353,7 @@ class CustomDrawer extends ConsumerWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[500],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -375,6 +375,8 @@ class CustomDrawer extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    /// check if i have pending tasks in unsynced if yes ask me if i would discard sync and logout or wait
+    final pending = container.read(todoRepositoryProvider).getPending();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -386,16 +388,27 @@ class CustomDrawer extends ConsumerWidget {
             const SizedBox(width: 12),
             Text(
               'Logout',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],
         ),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(fontSize: 14),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Are you sure you want to logout?',
+              style: TextStyle(fontSize: 14),
+            ),
+            if (pending.isNotEmpty)
+              Text(
+                'You still haave ${pending.length} pending tasks that is yet to but uploaded. By logging out you would lose this data',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.red.withValues(alpha: 0.5),
+                ),
+                textAlign: TextAlign.center,
+              ),
+          ],
         ),
         actions: [
           TextButton(
@@ -405,7 +418,7 @@ class CustomDrawer extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(authNotifierProvider.notifier).logout();
+              container.read(authNotifierProvider.notifier).logout();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade700,

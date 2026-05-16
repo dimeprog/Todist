@@ -59,7 +59,6 @@ class SyncEngine {
 
   void _setLastSync([DateTime? time]) {
     AppLocalPrefs.latSyncAt = time?.toIso8601String();
-    print(time);
     _lastSyncedAt = AppLocalPrefs.latSyncAt != null
         ? DateTime.tryParse(AppLocalPrefs.latSyncAt!)
         : null;
