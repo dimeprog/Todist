@@ -86,7 +86,8 @@ class TodoSheet extends HookConsumerWidget {
               DateTimeFormField(
                 label: 'Due date',
                 hintText: 'Set reminder date and time',
-                initialValue: selectedDate.value,
+                initialValue: (selectedDate.value?.isBefore(DateTime.now()) ?? true)? DateTime.now(): selectedDate.value,
+                // initialValue: selectedDate.value,
                 firstDate: DateTime.now(),
                 lastDate: DateTime.now().add(const Duration(days: 365)),
                 onSaved: (dateTime) {
@@ -154,7 +155,7 @@ class TodoSheet extends HookConsumerWidget {
                             : null,
                         pushToken: AppLocalPrefs.fcm,
                       );
-                      // log.d(t.toRemoteJson());
+                      
                       Navigator.pop(context, t);
                     }
                   },

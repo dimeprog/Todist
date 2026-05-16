@@ -13,9 +13,7 @@ class TodosPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final controller = useTextEditingController();
     final todosAsync = ref.watch(filteredTodosProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasks'),
@@ -34,7 +32,6 @@ class TodosPage extends HookConsumerWidget {
         onPressed: () async {
           final todo = await TodoSheet.show(context);
           if (todo != null) {
-            // ref.read(todoListProvider.notifier).createTodo(todo);
             ref.read(todoActionsProvider.notifier).createTodo(todo);
           }
         },

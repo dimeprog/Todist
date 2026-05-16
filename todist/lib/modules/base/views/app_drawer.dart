@@ -10,6 +10,7 @@ import 'package:todist/modules/todos/data/todo_providers.dart';
 
 import '../../auth/view_model/auth_notifier.dart';
 import '../../profile/views/profile_page.dart';
+import '../../todos/vms/todolist_provider.dart';
 
 class CustomDrawer extends ConsumerWidget {
   const CustomDrawer({super.key});
@@ -17,6 +18,9 @@ class CustomDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(profileProvider).valueOrNull;
+    final completed = ref.watch(todoStatsProvider.select((v) => v.completed));
+    final pending = ref.watch(todoStatsProvider.select((v) => v.pending));
+    final reminder = ref.watch(todoStatsProvider.select((v) => v.reminders));
 
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -164,21 +168,21 @@ class CustomDrawer extends ConsumerWidget {
                   context,
                   icon: Icons.check_circle_outline,
                   label: 'Completed',
-                  value: '24',
+                  value: '$completed',
                   color: Colors.green,
                 ),
                 _buildStatsTile(
                   context,
                   icon: Icons.pending_outlined,
                   label: 'Pending',
-                  value: '12',
+                  value: '$pending',
                   color: Colors.orange,
                 ),
                 _buildStatsTile(
                   context,
                   icon: Icons.notifications_none,
                   label: 'Reminders',
-                  value: '8',
+                  value: '$reminder',
                   color: Colors.blue,
                 ),
 
