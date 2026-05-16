@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/modules/auth/view_model/auth_state.dart';
 import 'package:todist/modules/auth/views/login.dart';
 import 'package:todist/modules/todos/views/todo_item.dart';
+import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
 import '../../auth/view_model/auth_notifier.dart';
-import '../vms/todo_notifier.dart';
+import '../vms/todolist_provider.dart';
 import 'todo_sheet.dart';
 import 'todo_stats.dart';
 
@@ -15,7 +15,7 @@ class TodosPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = useTextEditingController();
+    // final controller = useTextEditingController();
     final todosAsync = ref.watch(filteredTodosProvider);
 
     return Scaffold(
@@ -26,7 +26,7 @@ class TodosPage extends HookConsumerWidget {
           Consumer(
             builder: (_, WidgetRef ref, __) {
               ref.listen(authNotifierProvider, (p, n) {
-                if (n is Logout) {
+                if (n is LogoutSuccess) {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (_) => LoginPage()),
@@ -54,7 +54,8 @@ class TodosPage extends HookConsumerWidget {
         onPressed: () async {
           final todo = await TodoSheet.show(context);
           if (todo != null) {
-            ref.read(todoListProvider.notifier).createTodo(todo);
+            // ref.read(todoListProvider.notifier).createTodo(todo);
+            ref.read(todoActionsProvider.notifier).createTodo(todo);
           }
         },
       ),
@@ -111,6 +112,7 @@ class TodosPage extends HookConsumerWidget {
           // ),
 
           // ── Todo list ──────────────────────────────────────
+          SizedBox(height: 10),
           Expanded(
             child: todosAsync.when(
               data: (todos) {

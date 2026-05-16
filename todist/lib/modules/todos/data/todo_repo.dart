@@ -5,6 +5,7 @@ import 'package:todist/models/outbox_entry.dart';
 import 'package:todist/models/todo_model.dart';
 import 'package:todist/modules/todos/data/sources/sync_engine.dart';
 
+import '../../../core/logger.dart';
 import 'sources/local_todo_source.dart';
 
 class TodoRepository {
@@ -15,11 +16,10 @@ class TodoRepository {
   TodoRepository({
     required LocalTodoStore local,
     required SyncEngine syncEngine,
-    required NotificationsController notificationService
+    required NotificationsController notificationService,
   }) : _local = local,
        _syncEngine = syncEngine,
        _notificationService = notificationService;
-       
 
   // ── Read ───────────────────────────────────────────────────
 
@@ -33,30 +33,33 @@ class TodoRepository {
     // final todo = TodoModel(title: title, syncStatus: SyncStatus.pending);
 
     // 1. Write to local immediately
-    await _local.save(todo);
-    // 2. Schedule local notification
-    await _notificationService.scheduleLocalNotification(
-      id: todo.hashCode,
-      body: todo.description ?? "",
-      title: todo.title,
-      scheduledTime: todo.reminderAt ?? todo.createdAt.add(Duration(hours: 24)),
-    );
+    try {
+      await _local.save(todo);
+      // 2. Schedule local notification
+      await _notificationService.scheduleLocalNotification(
+        id: todo.hashCode,
+        body: todo.description ?? "",
+        title: todo.title,
+        scheduledTime:
+            todo.reminderAt ?? todo.createdAt.add(Duration(hours: 24)),
+      );
 
-    // 3. Enqueue to outbox (always — dequeued on success)
-    await _local.enqueue(
-      OutboxEntry(
-        localId: todo.localId,
-        operation: OutboxOperation.upsert,
-        payload: todo.toRemoteJson(),
-      ),
-    );
+      // 3. Enqueue to outbox (always — dequeued on success)
+      await _local.enqueue(
+        OutboxEntry(
+          localId: todo.localId,
+          operation: OutboxOperation.upsert,
+          payload: todo.toRemoteJson(),
+        ),
+      );
 
-    // 4. Attempt remote sync — outbox handles failure
-    await _syncEngine.syncAfterWrite(todo);
-
-    
-
-    return todo;
+      // 4. Attempt remote sync — outbox handles failure
+      await _syncEngine.syncAfterWrite(todo);
+      return todo;
+    } catch (e) {
+      log.e(e);
+      rethrow;
+    }
   }
 
   Future<TodoModel> toggle(TodoModel todo) async {
@@ -143,9 +146,10 @@ class TodoRepository {
     );
   }
 
-  Future<void> clear()async{
+  Future<void> clear() async {
     await _local.clear();
   }
 
+  /// get todo by local id
+  TodoModel? getByLocalId(String localId) => _local.getByLocalId(localId);
 }
-

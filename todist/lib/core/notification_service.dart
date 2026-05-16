@@ -13,9 +13,15 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:todist/core/app_local_prefs.dart';
 import 'package:todist/core/logger.dart';
+import 'package:todist/main.dart';
+import 'package:todist/modules/todos/data/todo_providers.dart';
+
+import '../modules/todos/views/todo_details.dart';
 
 final NotificationsController notificationController =
     NotificationsController();
+
+final parentKey = GlobalKey<NavigatorState>();
 
 class NotificationsController {
   static final NotificationsController _instance =
@@ -166,7 +172,7 @@ class NotificationsController {
           id: _generateNotificationId(message),
           title: notification.title ?? "Reminder",
           body: notification.body ?? "",
-          payload: message.data['todo_id'],
+        payload: message.data['local_id'],
         );
       // } else {
       //   log.d("Android: FCM will show notification natively");
@@ -277,13 +283,13 @@ class NotificationsController {
     RemoteMessage? initialMessage = await firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
       log.d("App opened from terminated state via notification");
-      _handleNavigation(initialMessage.data['todo_id']);
+      _handleNavigation(initialMessage.data['local_id']);
     }
 
     // Handle when app is in background and opened via notification
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage event) {
       log.d("App opened from background via notification");
-      _handleNavigation(event.data['todo_id']);
+      _handleNavigation(event.data['local_id']);
     });
 
     // Handle messages while app is in foreground
@@ -296,9 +302,33 @@ class NotificationsController {
   void _handleNavigation(String? payload) {
     if (payload == null || payload.isEmpty) return;
 
-    log.d("Navigating with payload: $payload");
-    // Add your navigation logic here
-    // Example: navigatorKey.currentState?.pushNamed('/todo', arguments: payload);
+    try {
+      log.d("Navigating with payload: $payload");
+  
+      // Get the current context
+      final context = parentKey.currentContext;
+      if (context == null) {
+        log.d("Context not found");
+        return;
+      }
+
+      // Method 1: If payload is a todo ID, fetch from provider
+      // Find the todo by ID from your todo list
+      final todo = container.read(localStoreProvider).getByLocalId(payload);
+
+      if (todo != null) {
+        // Open TodoDetails bottom sheet
+        TodoDetails.show(context, todo: todo);
+      } else {
+        // Handle error - todo not found
+        log.e("Todo not found with ID: $payload");
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Todo not found')));
+      }
+    } catch (e) {
+      log.e(e);
+    }
   }
 
   /// Schedule a local notification for reminder (NOT for FCM messages)
@@ -309,7 +339,7 @@ class NotificationsController {
     required DateTime scheduledTime,
   }) async {
     // Cancel any existing notification with same ID
-    await cancelNotification(id);
+    // await cancelNotification(id);
 
     final tz.TZDateTime scheduledTz = tz.TZDateTime.from(
       scheduledTime,

@@ -135,9 +135,9 @@ class TodoSheet extends HookConsumerWidget {
                       final t = todo?.copyWith(
                         title: titleController.text,
                         description: descriptionController.text,
-                        dueDate: selectedDate.value?.toUtc(),
+                        dueDate: selectedDate.value,
                         reminderAt: reminderOn.value
-                            ? selectedDate.value?.setReminder.toUtc()
+                            ? selectedDate.value?.setReminder
                             : null,
                         pushToken: AppLocalPrefs.fcm,
                       );
@@ -146,9 +146,9 @@ class TodoSheet extends HookConsumerWidget {
                     final t = TodoModel(
                       title: titleController.text,
                       description: descriptionController.text,
-                      dueDate: selectedDate.value?.toUtc(),
+                      dueDate: selectedDate.value,
                       reminderAt: reminderOn.value
-                          ? selectedDate.value?.setReminder.toUtc()
+                          ? selectedDate.value?.setReminder
                           : null,
                       pushToken: AppLocalPrefs.fcm,
                     );

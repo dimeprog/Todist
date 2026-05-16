@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:todist/core/app_theme.dart';
+import 'package:todist/core/notification_service.dart';
 import 'package:todist/modules/auth/views/login.dart';
 import 'package:todist/modules/todos/views/todos_page.dart';
 
@@ -18,6 +19,7 @@ class Todist extends ConsumerWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: "Todist",
+        navigatorKey: parentKey,
         theme: AppTheme.darkTheme,
         home: StreamBuilder<AuthState>(
           stream: supabase.auth.onAuthStateChange,

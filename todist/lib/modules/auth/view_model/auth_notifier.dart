@@ -55,6 +55,14 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   void logout() async {
-    await _authRepository.logout().then((_) => state = Logout());
+    try {
+      state = LogoutProcessing();
+      await _authRepository.logout().then(
+        (_) => state = LogoutSuccess(message: 'Logout successful'),
+      );
+      
+    } catch (e) {
+      state = LogoutFailure(message: e.toString());
+    }
   }
 }

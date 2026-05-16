@@ -41,6 +41,50 @@ extension TimeExt on DateTime {
     final sh = this;
     return sh.subtract(const Duration(minutes: 5));
   }
+
+
+  
+
+String get timeAgoFormat {
+    final dateTime = this;
+
+    try {
+      DateTime parsedDate;
+      parsedDate = dateTime;
+
+      final now = DateTime.now();
+      final difference = parsedDate.difference(now);
+
+      // For dates within 1 minute
+      if (difference.abs().inMinutes < 1) {
+        return 'Now';
+      }
+
+      // For dates within 24 hours
+      if (difference.abs().inDays < 1) {
+        // Check if date is in the future (difference.inMilliseconds > 0)
+        if (difference.inMilliseconds > 0) {
+          if (difference.inHours > 0) {
+            return 'In ${difference.inHours} hour${difference.inHours != 1 ? 's' : ''}';
+          } else {
+            return 'In ${difference.inMinutes} minute${difference.inMinutes != 1 ? 's' : ''}';
+          }
+        } else {
+          final absDiff = difference.abs();
+          if (absDiff.inHours > 0) {
+            return '${absDiff.inHours} hour${absDiff.inHours != 1 ? 's' : ''} ago';
+          } else {
+            return '${absDiff.inMinutes} minute${absDiff.inMinutes != 1 ? 's' : ''} ago';
+          }
+        }
+      }
+
+      // For older dates, show formatted date
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(parsedDate.toLocal());
+    } catch (e) {
+      return 'Invalid date';
+    }
+  }
 }
 
 extension StringExt on String{

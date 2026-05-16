@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:todist/core/extensions.dart';
 import 'package:todist/models/enums/sync_status.dart';
 import 'package:todist/models/todo_model.dart';
+import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
-import '../vms/todo_notifier.dart';
 import 'todo_details.dart';
 
 class TodoItemTile extends ConsumerWidget {
@@ -28,7 +28,8 @@ class TodoItemTile extends ConsumerWidget {
               leading: Checkbox(
                 value: todo.isCompleted,
                 onChanged: (_) {
-                  ref.read(todoListProvider.notifier).toggleTodo(todo);
+                  // ref.read(todoListProvider.notifier).toggleTodo(todo);
+                  ref.read(todoActionsProvider.notifier).toggleTodo(todo);
                 },
               ),
               title: Text(
@@ -119,7 +120,8 @@ class TodoItemTile extends ConsumerWidget {
               ],
             ),
             onTap: () {
-              ref.read(todoListProvider.notifier).retryFailed(todo);
+              // ref.read(todoListProvider.notifier).retryFailed(todo);
+              ref.read(todoActionsProvider.notifier).retryFailed(todo);
             },
           ),
         PopupMenuItem(
@@ -131,7 +133,8 @@ class TodoItemTile extends ConsumerWidget {
             ],
           ),
           onTap: () {
-            ref.read(todoListProvider.notifier).deleteTodo(todo);
+            // ref.read(todoListProvider.notifier).deleteTodo(todo);
+            ref.read(todoActionsProvider.notifier).deleteTodo(todo);
           },
         ),
       ],
@@ -157,8 +160,11 @@ class TodoItemTile extends ConsumerWidget {
             ),
             onSubmitted: (value) {
               if (value.trim().isNotEmpty) {
+                // ref
+                //     .read(todoListProvider.notifier)
+                //     .updateTitle(todo, value.trim());
                 ref
-                    .read(todoListProvider.notifier)
+                    .read(todoActionsProvider.notifier)
                     .updateTitle(todo, value.trim());
                 Navigator.pop(context);
               }
@@ -172,8 +178,11 @@ class TodoItemTile extends ConsumerWidget {
             FilledButton(
               onPressed: () {
                 if (controller.text.trim().isNotEmpty) {
+                  // ref
+                  //     .read(todoListProvider.notifier)
+                  //     .updateTitle(todo, controller.text.trim());
                   ref
-                      .read(todoListProvider.notifier)
+                      .read(todoActionsProvider.notifier)
                       .updateTitle(todo, controller.text.trim());
                   Navigator.pop(context);
                 }

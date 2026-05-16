@@ -9,17 +9,19 @@ import 'package:todist/todist.dart';
 
 import 'modules/todos/data/sources/local_todo_source.dart';
 
+final container= ProviderContainer();
 Future<void> main() async {
    WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await setUp();
     await configureFirebase();
 
-  final localStore = LocalTodoStore();
-  await localStore.init();
+  // final localStore = LocalTodoStore();
+  // await localStore.init();
   runApp(
     ProviderScope(
-      overrides: [localStoreProvider.overrideWithValue(localStore)],
+      // container: container,
+      // overrides: [localStoreProvider.overrideWithValue(localStore)],
       child: const Todist(),
     ),
   );
