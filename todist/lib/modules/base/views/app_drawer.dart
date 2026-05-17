@@ -7,6 +7,7 @@ import 'package:todist/main.dart';
 import 'package:todist/modules/profile/vms/profile_provider.dart';
 import 'package:todist/modules/settings/views/settings_page.dart';
 import 'package:todist/modules/todos/data/todo_providers.dart';
+
 import '../../auth/view_model/auth_notifier.dart';
 import '../../profile/views/profile_page.dart';
 import '../../todos/vms/todolist_provider.dart';
@@ -185,6 +186,14 @@ class CustomDrawer extends ConsumerWidget {
                   value: '$reminder',
                   color: Colors.blue,
                 ),
+                _buildStatsTile(
+                  context,
+                  icon: Icons.local_fire_department,
+                  label: 'Current Streak',
+                  value: '${user?.currentStreak ?? 0}',
+                  color: Colors.orange,
+                ),
+                
 
                 const Divider(height: 32, thickness: 1),
 

@@ -57,7 +57,10 @@ class ProfilePage extends HookConsumerWidget {
                   );
                 });
                 return isLoading
-                    ? Center(child: CircularProgressIndicator())
+                    ? Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
                     : TextButton(
                         onPressed: () {
                           saveChanges();
@@ -75,43 +78,50 @@ class ProfilePage extends HookConsumerWidget {
             nameController.text = user.fullName ?? '';
           }
 
-          return CustomScrollView(
-            slivers: [
-              // Header Section with Avatar and Name
-              SliverToBoxAdapter(
-                child: ProfileHeader(
-                  nameController: nameController,
-                  user: user,
-                  isEditing: isEditing.value,
-                  onSaveChanges: (v) {
-                    isEditing.value = v;
-                  },
+          return RefreshIndicator(
+            onRefresh: () async {
+               return ref
+                  .read(profileProvider.future);
+                
+            },
+            child: CustomScrollView(
+              slivers: [
+                // Header Section with Avatar and Name
+                SliverToBoxAdapter(
+                  child: ProfileHeader(
+                    nameController: nameController,
+                    user: user,
+                    isEditing: isEditing.value,
+                    onSaveChanges: (v) {
+                      isEditing.value = v;
+                    },
+                  ),
                 ),
-              ),
-
-              // Streak Section
-              SliverToBoxAdapter(
-                child: ProfileSteakSection(
-                  currentStreak: user.currentStreak,
-                  longestStreak: user.longestStreak,
-                  lastStreakDate: user.lastStreakDate,
+            
+                // Streak Section
+                SliverToBoxAdapter(
+                  child: ProfileSteakSection(
+                    currentStreak: user.currentStreak,
+                    longestStreak: user.longestStreak,
+                    lastStreakDate: user.lastStreakDate,
+                  ),
                 ),
-              ),
-
-              // Stats Cards
-              SliverToBoxAdapter(child: _buildStatsSection(user)),
-
-              // Streak Calendar
-              SliverToBoxAdapter(child: StreakCalendar(userId: user.id)),
-
-              // Profile Information Section
-              SliverToBoxAdapter(child: _buildInfoSection(user)),
-
-              // Action Buttons
-              SliverToBoxAdapter(child: _buildActionButtons(context)),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
-            ],
+            
+                // Stats Cards
+                SliverToBoxAdapter(child: _buildStatsSection(user)),
+            
+                // Streak Calendar
+                SliverToBoxAdapter(child: StreakCalendar(userId: user.id)),
+            
+                // Profile Information Section
+                SliverToBoxAdapter(child: _buildInfoSection(user)),
+            
+                // Action Buttons
+                SliverToBoxAdapter(child: _buildActionButtons(context)),
+            
+                const SliverToBoxAdapter(child: SizedBox(height: 32)),
+              ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

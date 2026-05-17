@@ -83,7 +83,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       };
 
       if (fullName != null) updates['full_name'] = fullName;
-      if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+      // if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+       updates['avatar_url'] = avatarUrl;
       if (fcmToken != null) updates['fcm_token'] = fcmToken;
       // log.i(updates);
 
