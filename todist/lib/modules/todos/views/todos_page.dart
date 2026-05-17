@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:todist/modules/auth/view_model/auth_state.dart';
-import 'package:todist/modules/auth/views/login.dart';
 import 'package:todist/modules/todos/views/todo_item.dart';
 import 'package:todist/modules/todos/vms/todo_notifier.dart';
 
-import '../../auth/view_model/auth_notifier.dart';
+import '../../base/views/app_drawer.dart';
 import '../vms/todolist_provider.dart';
 import 'todo_sheet.dart';
 import 'todo_stats.dart';
@@ -15,101 +13,32 @@ class TodosPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final controller = useTextEditingController();
     final todosAsync = ref.watch(filteredTodosProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasks'),
         elevation: 0,
-        actions: [
-          Consumer(
-            builder: (_, WidgetRef ref, __) {
-              ref.listen(authNotifierProvider, (p, n) {
-                if (n is LogoutSuccess) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => LoginPage()),
-                    (_) => false,
-                  );
-                }
-              });
-              return IconButton(
-                onPressed: () {
-                  ref.read(authNotifierProvider.notifier).logout();
-                },
-                icon: Icon(Icons.exit_to_app_sharp),
-              );
-            },
-          ),
-        ],
+        
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(100),
           child: Column(children: [const TodoStatsBar(), _FilterChips()]),
         ),
       ),
+      drawer: CustomDrawer(), 
+      
       floatingActionButton: FloatingActionButton(
         shape: CircleBorder(),
         child: const Icon(Icons.add),
         onPressed: () async {
           final todo = await TodoSheet.show(context);
           if (todo != null) {
-            // ref.read(todoListProvider.notifier).createTodo(todo);
             ref.read(todoActionsProvider.notifier).createTodo(todo);
           }
         },
       ),
       body: Column(
         children: [
-          // ── Add todo input ─────────────────────────────────
-          // Consumer(
-          //   builder: (_, WidgetRef ref, __) {
-          //     final filter = ref.watch(todoFilterProvider);
-          //     return filter == TodoFilter.active
-          //         ? Padding(
-          //             padding: const EdgeInsets.all(16.0),
-          //             child: Row(
-          //               children: [
-          //                 Expanded(
-          //                   child: TextField(
-          //                     textCapitalization: TextCapitalization.sentences,
-          //                     controller: controller,
-          //                     decoration: const InputDecoration(
-          //                       hintText: 'What needs to be done?',
-          //                       border: OutlineInputBorder(),
-          //                       contentPadding: EdgeInsets.symmetric(
-          //                         horizontal: 16,
-          //                         vertical: 12,
-          //                       ),
-          //                     ),
-          //                     onSubmitted: (value) {
-          //                       // if (value.trim().isNotEmpty) {
-          //                       //   ref
-          //                       //       .read(todoListProvider.notifier)
-          //                       //       .createTodo(value.trim());
-          //                       //   controller.clear();
-          //                       // }
-          //                     },
-          //                   ),
-          //                 ),
-          //                 const SizedBox(width: 8),
-          //                 IconButton.filled(
-          //                   onPressed: () {
-          //                     // if (controller.text.trim().isNotEmpty) {
-          //                     //   ref
-          //                     //       .read(todoListProvider.notifier)
-          //                     //       .createTodo(controller.text.trim());
-          //                     //   controller.clear();
-          //                     // }
-          //                   },
-          //                   icon: const Icon(Icons.add),
-          //                 ),
-          //               ],
-          //             ),
-          //           )
-          //         : SizedBox.shrink();
-          //   },
-          // ),
+          
 
           // ── Todo list ──────────────────────────────────────
           SizedBox(height: 10),

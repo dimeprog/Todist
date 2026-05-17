@@ -26,6 +26,7 @@ class TodoRepository {
   List<TodoModel> getAll() => _local.getAll();
 
   Stream<dynamic> watchAll() => _local.watchTodos();
+  List<TodoModel> getPending() => _local.getPending();
 
   // ── Write ──────────────────────────────────────────────────
 

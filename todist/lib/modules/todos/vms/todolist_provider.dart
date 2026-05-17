@@ -7,6 +7,7 @@ import 'package:todist/models/todo_model.dart';
 import 'package:todist/modules/todos/data/todo_providers.dart';
 import 'package:todist/modules/todos/data/todo_repo.dart';
 
+import '../../../models/todo_stats.dart';
 import '../../../utils/aysnclist_mixin.dart';
 import 'todo_notifier.dart';
 
@@ -18,7 +19,7 @@ final todoListProvider =
     );
 
 class TodoListNotifier extends AsyncNotifier<List<TodoModel>>
-    with AysncListMixin<TodoModel> {
+    with AsyncListMixin<TodoModel> {
   late TodoRepository _repository;
   StreamSubscription? _subscription;
 
@@ -99,18 +100,24 @@ final filteredTodosProvider = Provider<AsyncValue<List<TodoModel>>>((ref) {
 
 // ── Stats ──────────────────────────────────────────────────
 
-final todoStatsProvider = Provider<Map<String, int>>((ref) {
+final todoStatsProvider = Provider<TodoStats>((ref) {
   final todosAsync = ref.watch(todoListProvider);
 
   return todosAsync.when(
-    data: (todos) => {
-      'total': todos.length,
-      'active': todos.where((t) => !t.isCompleted).length,
-      'completed': todos.where((t) => t.isCompleted).length,
-      'pending': todos.where((t) => t.syncStatus == SyncStatus.pending).length,
-      'failed': todos.where((t) => t.syncStatus == SyncStatus.failed).length,
-    },
-    loading: () => {},
-    error: (_, __) => {},
+    data: (todos) => TodoStats(
+      total: todos.length,
+      active: todos.where((t) => !t.isCompleted).length,
+      completed: todos.where((t) => t.isCompleted).length,
+      pending: todos.where((t) => t.syncStatus == SyncStatus.pending).length,
+      failed: todos.where((t) => t.syncStatus == SyncStatus.failed).length,
+      deleted: todos.where((t) => t.isDeleted).length,
+      reminders: todos
+          .where((t) => t.reminderSent == false && t.reminderAt != null)
+          .length,
+    ),
+
+    loading: () => TodoStats(),
+    error: (_, __) => TodoStats(),
   );
 });
+

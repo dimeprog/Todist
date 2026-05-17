@@ -15,7 +15,7 @@ class TodoStatsBar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(todoStatsProvider);
-    final pending = stats['pending'] ?? 0;
+    final pending = stats.pending ;
 
     /// UI state
     final showSyncing = useState(false);
@@ -64,30 +64,30 @@ class TodoStatsBar extends HookConsumerWidget {
         children: [
           _StatChip(
             label: 'Total',
-            count: stats['total'] ?? 0,
+            count: stats.total ,
             color: Colors.blue,
           ),
           _StatChip(
             label: 'Active',
-            count: stats['active'] ?? 0,
+            count: stats.active ,
             color: Colors.orange,
           ),
           _StatChip(
             label: 'Done',
-            count: stats['completed'] ?? 0,
+            count: stats.completed,
             color: Colors.green,
           ),
            if (showSyncing.value)
             _StatChip(
               label: 'Syncing',
-              count: stats['pending'] ?? 0,
+              count: stats.pending,
               color: Colors.amber,
               icon: Icons.sync,
             ),
-          if ((stats['failed'] ?? 0) > 0)
+          if (stats.failed > 0)
             _StatChip(
               label: 'Failed',
-              count: stats['failed'] ?? 0,
+              count: stats.failed ,
               color: Colors.red,
               icon: Icons.error_outline,
             ),

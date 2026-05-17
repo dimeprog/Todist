@@ -20,6 +20,8 @@ abstract class AuthRepository {
 
   Stream<AuthState> authStateChanges();
 
+UserModel? getCurrentUser();
+
   FutureResponse<bool> logout();
 }
 
@@ -91,6 +93,17 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       debugPrint(e.toString());
       return Left(Failure(e.toString()));
+    }
+  }
+  
+  @override
+  UserModel? getCurrentUser() {
+    try {
+      final user = client.auth.currentUser;
+      if (user == null) return null;
+      return UserModel.fromSupaBase(user);
+    } catch (e) {
+      return null;
     }
   }
 }
