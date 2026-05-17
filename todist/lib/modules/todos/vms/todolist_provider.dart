@@ -19,7 +19,7 @@ final todoListProvider =
     );
 
 class TodoListNotifier extends AsyncNotifier<List<TodoModel>>
-    with AysncListMixin<TodoModel> {
+    with AsyncListMixin<TodoModel> {
   late TodoRepository _repository;
   StreamSubscription? _subscription;
 

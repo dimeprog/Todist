@@ -24,6 +24,22 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Todist would like to use your camera for challenge and profile photos</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Todist would needs access to location when in the background to give you close community in your current location.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Todist would needs access to location when in the background to give you close community in your current location.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Todist would need access to location when open to filter search.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Todist would like to use your microphone for recording sounds</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Todist would like to save photos to your photo gallery</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Todist would like to access to your photo gallery to select images</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:fpdart/fpdart.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:todist/core/failure.dart';
 import 'package:todist/core/logger.dart';
 import 'package:todist/models/user_model.dart';
 import 'package:todist/modules/auth/view_model/auth_notifier.dart';
 import 'package:todist/modules/profile/data/profile_repo.dart';
 import 'package:todist/modules/profile/data/streak_repo.dart';
 
+import '../../../core/response_data.dart';
+import '../../../utils/aysnclist_mixin.dart';
 import '../../auth/view_model/auth_state.dart';
 import 'states/profile_state.dart';
 
@@ -14,7 +18,8 @@ final profileProvider = AsyncNotifierProvider<ProfileNotifier, UserModel>(
   ProfileNotifier.new,
 );
 
-class ProfileNotifier extends AsyncNotifier<UserModel> {
+class ProfileNotifier extends AsyncNotifier<UserModel>
+    with AsyncMixin<UserModel> {
   late ProfileRepository _profileRepository;
   late StreakRepository _streakRepository;
 
@@ -22,6 +27,7 @@ class ProfileNotifier extends AsyncNotifier<UserModel> {
   FutureOr<UserModel> build() {
     _profileRepository = ref.watch(profileRepositoryProvider);
     _streakRepository = ref.watch(streakRepositoryProvider);
+    onNetworkStateChanged();
     onAuthChange();
     onStreakChange();
     onProfileAction();
@@ -98,6 +104,27 @@ class ProfileActionsNotifier extends Notifier<ProfileState> {
         (l) => state = UpdateErrorProfile(l.message),
         (r) => state = UpdatedProfile(r.data),
       );
+    } catch (e) {
+      log.e(e);
+      state = UpdateErrorProfile('Something went wrong,try again');
+    }
+  }
+
+  void updateAvatar(String? avatarPath) async {
+    try {
+      state = UpdatingProfile();
+      late Either<Failure<ResponseData<UserModel>>, ResponseData<UserModel>>
+      result;
+      if (avatarPath == null) {
+        result = await _profileRepository.deleteAvatar();
+      } else {
+        result = await _profileRepository.uploadAvatar(avatarPath);
+      }
+      result.fold(
+        (l) => state = UpdateErrorProfile(l.message),
+        (r) => state = UpdatedProfile(r.data),
+      );
+      // log.d(result.toString());
     } catch (e) {
       log.e(e);
       state = UpdateErrorProfile('Something went wrong,try again');

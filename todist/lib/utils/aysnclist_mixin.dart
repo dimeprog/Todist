@@ -1,11 +1,32 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:riverpod/src/async_notifier.dart';
 
+
 // ignore: invalid_use_of_internal_member
-mixin  AysncListMixin<T> on  AsyncNotifierBase<List<T>>{
+mixin AsyncMixin<T> on AsyncNotifierBase<T> {
+  void onNetworkStateChanged() {
+    InternetConnection().onStatusChange.listen((status) {
+      // log.d('NETWORK STATE: ${status.toString()}');
+      if (status == InternetStatus.connected && state.hasError) {
+        ref.invalidateSelf(); // Refresh provider if network is back
+      }
+    });
+  }
+}
 
+// ignore: invalid_use_of_internal_member
+mixin AsyncListMixin<T> on AsyncNotifierBase<List<T>> {
+  void onNetworkStateChanged() {
+    InternetConnection().onStatusChange.listen((status) {
+      // log.d('NETWORK STATE: ${status.toString()}');
+      if (status == InternetStatus.connected && state.hasError) {
+        ref.invalidateSelf(); // Refresh provider if network is back
+      }
+    });
+  }
 
-    /// update the list by finding and replacing  used mostly during updating
+  /// update the list by finding and replacing  used mostly during updating
   void findAndReplace({
     required T model,
     bool Function(T)? test,

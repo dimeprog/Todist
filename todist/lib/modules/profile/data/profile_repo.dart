@@ -9,6 +9,8 @@ import 'package:todist/core/response_data.dart';
 import 'package:todist/core/typedefs.dart';
 import 'package:todist/models/user_model.dart';
 
+import '../../../core/logger.dart';
+
 abstract class ProfileRepository {
   FutureResponse<UserModel> getProfile(String userId);
   FutureResponse<UserModel> getCurrentUserProfile();
@@ -19,7 +21,7 @@ abstract class ProfileRepository {
   });
   RealtimeChannel subscribeToProfile(String userId);
   FutureResponse<UserModel> uploadAvatar(String filePath);
-  FutureResponse<bool> deleteAvatar();
+  FutureResponse<UserModel> deleteAvatar();
   FutureResponse<void> updateFcmToken(String fcmToken);
 
   /// Streak(),
@@ -46,7 +48,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
         return Left(Failure('User not found'));
       }
       return Right(ResponseData(data: UserModel.fromJson(response)));
-    } catch (e) {
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
       return Left(Failure('Failed to get profile'));
     }
   }
@@ -58,7 +61,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return Left(Failure("Unable to get current user"));
       return await getProfile(userId);
-    } catch (e) {
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
       return Left(Failure('Failed to get current user profile'));
     }
   }
@@ -81,6 +85,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       if (fullName != null) updates['full_name'] = fullName;
       if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
       if (fcmToken != null) updates['fcm_token'] = fcmToken;
+      // log.i(updates);
 
       final response = await _supabase
           .from('users')
@@ -91,8 +96,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       // return UserModel.fromJson(response);
       return Right(ResponseData(data: UserModel.fromJson(response)));
-    } catch (e) {
-      // throw Exception('Failed to update profile: $e');
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
       return Left(Failure('Failed to update profile'));
     }
   }
@@ -113,8 +118,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
           .eq('id', userId);
 
       return Right(ResponseData(data: null));
-    } catch (e) {
-      // throw Exception('Failed to update FCM token: $e');
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
       return Left(Failure('Failed to update FCM token'));
     }
   }
@@ -126,26 +131,29 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return Left(Failure('User not authenticated'));
 
-      final fileName =
-          'avatars/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      await _supabase.storage.from('avatars').upload(fileName, File(filePath));
+      // Fixed: Use 'Todist_avatars' instead of 'avatars'
+      final fileName = '$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await _supabase.storage
+          .from('Todist_avatars') // ← Fixed bucket name
+          .upload(fileName, File(filePath));
 
       // Get public URL
       final avatarUrl = _supabase.storage
-          .from('avatars')
+          .from('Todist_avatars') // ← Fixed bucket name
           .getPublicUrl(fileName);
 
       // Update profile with new avatar URL
       return await updateProfile(avatarUrl: avatarUrl);
-    } catch (e) {
-      // throw Exception('Failed to upload avatar: $e');
-      return Left(Failure('Failed to upload avatar'));
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
+      return Left(Failure('Failed to upload avatar: $e'));
     }
   }
 
   // Delete avatar
   @override
-  FutureResponse<bool> deleteAvatar() async {
+  FutureResponse<UserModel> deleteAvatar() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return Left(Failure('User not authenticated'));
@@ -158,11 +166,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
           return Left(Failure('Failed to get current user profile'));
         },
         (r) {
-          return Right(ResponseData(data: true));
+          return Right(ResponseData(data: r.data));
         },
       );
-    } catch (e) {
-      // throw Exception('Failed to delete avatar: $e');
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
       return Left(Failure('Failed to delete avatar: $e'));
     }
   }
@@ -174,8 +182,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       if (userId == null) return Left(Failure('User not authenticated'));
 
       return getProfile(userId);
-    } catch (e) {
-      // throw Exception('Failed to get or create profile: $e');
+    } catch (e, s) {
+      log.e(e, stackTrace: s);
       return Left(Failure('Failed to get or create profile'));
     }
   }
@@ -200,9 +208,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
         )
         .subscribe();
 
-    // .map((event) {
-    //   // Transform event to UserModel
-    //   return UserModel.fromJson(event as Map<String, dynamic>);
-    // });
+    
   }
 }
